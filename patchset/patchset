@@ -1,0 +1,249 @@
+--- a/secure/usr.bin/openssl/Makefile	2016-03-08 11:44:55.144992956 +0100
++++ b/secure/usr.bin/openssl/Makefile	2016-03-07 18:13:20.734388332 +0100
+@@ -1,5 +1,9 @@
+ # $FreeBSD: releng/10.3/secure/usr.bin/openssl/Makefile 238405 2012-07-12 19:30:53Z jkim $
+ 
++.include <bsd.own.mk>
++
++.if "${WITH_LIBRESSL}" != "yes"
++.warning Building OpenSSL
+ PROG=	openssl
+ 
+ DPADD=	${LIBSSL} ${LIBCRYPTO}
+@@ -24,3 +28,7 @@ SRCS+=	app_rand.c apps.c asn1pars.c ca.c
+ 
+ .PATH:	${LCRYPTO_SRC}/apps \
+ 	${.CURDIR}/man
++
++.else
++.include "Makefile.libressl"
++.endif # !"${WITH_LIBRESSL}" == "yes"
+--- a/secure/lib/libcrypto/Makefile	2016-03-08 11:44:55.116993027 +0100
++++ b/secure/lib/libcrypto/Makefile	2016-03-08 13:55:35.376452518 +0100
+@@ -1,9 +1,13 @@
+ # $FreeBSD: releng/10.3/secure/lib/libcrypto/Makefile 288611 2015-10-03 16:24:20Z bdrewery $
+ 
++.include <bsd.own.mk>
++
++.if "${WITH_LIBRESSL}" != "yes"
++
+ SHLIBDIR?=	/lib
+ SUBDIR=		engines
+ 
+-.include <bsd.own.mk>
++#.include <bsd.own.mk>
+ 
+ LIB=		crypto
+ SHLIB_MAJOR=	7
+@@ -469,3 +473,7 @@ _bn_asmpath=	${LCRYPTO_SRC}/crypto/bn/as
+ 	${LCRYPTO_SRC}/crypto/x509 \
+ 	${LCRYPTO_SRC}/crypto/x509v3 \
+ 	${.CURDIR}/man
++
++.else
++.include "Makefile.libressl"
++.endif # !"${WITH_LIBRESSL}" == "yes"
+--- a/secure/lib/libssl/Makefile	2016-03-08 11:44:55.124993175 +0100
++++ b/secure/lib/libssl/Makefile	2016-03-07 14:46:18.689243495 +0100
+@@ -1,5 +1,9 @@
+ # $FreeBSD: releng/10.3/secure/lib/libssl/Makefile 246772 2013-02-13 23:07:20Z jkim $
+ 
++.include <bsd.own.mk>
++
++.if "${WITH_LIBRESSL}" != "yes"
++
+ LIB=		ssl
+ SHLIB_MAJOR=	7
+ 
+@@ -28,3 +32,7 @@ LDADD=	-lcrypto
+ 
+ .PATH:	${LCRYPTO_SRC}/ssl \
+ 	${.CURDIR}/man
++
++.else
++.include "Makefile.libressl"
++.endif # !"${WITH_LIBRESSL}" == "yes"
+--- a/contrib/telnet/libtelnet/pk.c	2015-05-25 21:46:00.868949000 +0200
++++ b/contrib/telnet/libtelnet/pk.c	2016-03-07 16:33:23.287802340 +0100
+@@ -129,7 +129,7 @@ common_key(char *xsecret, char *xpublic,
+         mp_pow(public, secret, modulus, common);
+         extractdeskey(common, deskey);
+         extractideakey(common, ideakey);
+-	des_set_odd_parity(deskey);
++	DES_set_odd_parity(deskey);
+         mp_mfree(common);
+         mp_mfree(secret);
+         mp_mfree(public);
+@@ -221,14 +221,14 @@ pk_encode(char *in, char *out, DesData *
+ {
+ 	char buf[256];
+ 	DesData i;
+-	des_key_schedule k;
++	DES_key_schedule k;
+ 	int l,op,deslen;
+ 
+ 	memset(&i,0,sizeof(i));
+ 	memset(buf,0,sizeof(buf));
+ 	deslen = ((strlen(in) + 7)/8)*8;
+-	des_key_sched(key, k);
+-	des_cbc_encrypt(in,buf,deslen, k,&i,DES_ENCRYPT);
++	DES_key_sched(key, &k);
++	DES_cbc_encrypt(in,buf,deslen, &k,&i,DES_ENCRYPT);
+ 	for (l=0,op=0;l<deslen;l++) {
+ 		out[op++] = hextab[(buf[l] & 0xf0) >> 4];
+ 		out[op++] = hextab[(buf[l] & 0x0f)];
+@@ -242,7 +242,7 @@ pk_decode(char *in, char *out, DesData *
+ {
+ 	char buf[256];
+ 	DesData i;
+-	des_key_schedule k;
++	DES_key_schedule k;
+ 	int n1,n2,op;
+ 	size_t l;
+ 
+@@ -259,7 +259,7 @@ pk_decode(char *in, char *out, DesData *
+ 			n2 = in[op+1] - '0';
+ 		buf[l] = n1*16 +n2;
+ 	}
+-	des_key_sched(key, k);
+-	des_cbc_encrypt(buf,out,strlen(in)/2, k,&i,DES_DECRYPT);
++	DES_key_sched(key, &k);
++	DES_cbc_encrypt(buf,out,strlen(in)/2, &k,&i,DES_DECRYPT);
+ 	out[strlen(in)/2] = '\0';
+ }
+--- a/contrib/telnet/libtelnet/pk.h	2015-05-25 21:46:00.871949000 +0200
++++ b/contrib/telnet/libtelnet/pk.h	2016-03-07 16:33:23.287802340 +0100
+@@ -32,7 +32,7 @@
+ /* header for the des routines that we will use */
+ 
+ typedef unsigned char byte, DesData[ 8], IdeaData[16];
+-#define DesKeys des_key_schedule
++#define DesKeys DES_key_schedule
+ 
+ #define DES_DECRYPT 0
+ #define DES_ENCRYPT 1
+--- a/contrib/telnet/libtelnet/enc_des.c	2015-05-25 21:46:00.861949000 +0200
++++ b/contrib/telnet/libtelnet/enc_des.c	2016-03-07 16:33:23.285083591 +0100
+@@ -207,9 +207,9 @@ fb64_start(struct fb *fbp, int dir, int 
+ 		/*
+ 		 * Create a random feed and send it over.
+ 		 */
+-		des_random_key((Block *)fbp->temp_feed);
+-		des_ecb_encrypt((Block *)fbp->temp_feed, (Block *)fbp->temp_feed,
+-				fbp->krbdes_sched, 1);
++		DES_random_key((Block *)fbp->temp_feed);
++		DES_ecb_encrypt((Block *)fbp->temp_feed, (Block *)fbp->temp_feed,
++				&fbp->krbdes_sched, 1);
+ 		p = fbp->fb_feed + 3;
+ 		*p++ = ENCRYPT_IS;
+ 		p++;
+@@ -393,7 +393,7 @@ fb64_session(Session_Key *key, int serve
+ 	fb64_stream_key(fbp->krbdes_key, &fbp->streams[DIR_ENCRYPT-1]);
+ 	fb64_stream_key(fbp->krbdes_key, &fbp->streams[DIR_DECRYPT-1]);
+ 
+-	des_key_sched((Block *)fbp->krbdes_key, fbp->krbdes_sched);
++	DES_key_sched((Block *)fbp->krbdes_key, &fbp->krbdes_sched);
+ 	/*
+ 	 * Now look to see if krbdes_start() was was waiting for
+ 	 * the key to show up.  If so, go ahead an call it now
+@@ -499,7 +499,7 @@ fb64_stream_iv(Block seed, struct stinfo
+ 	memmove((void *)stp->str_iv, (void *)seed, sizeof(Block));
+ 	memmove((void *)stp->str_output, (void *)seed, sizeof(Block));
+ 
+-	des_key_sched((Block *)stp->str_ikey, stp->str_sched);
++	DES_key_sched((Block *)stp->str_ikey, &stp->str_sched);
+ 
+ 	stp->str_index = sizeof(Block);
+ }
+@@ -508,7 +508,7 @@ void
+ fb64_stream_key(Block key, struct stinfo *stp)
+ {
+ 	memmove((void *)stp->str_ikey, (void *)key, sizeof(Block));
+-	des_key_sched((Block *)key, stp->str_sched);
++	DES_key_sched((Block *)key, &stp->str_sched);
+ 
+ 	memmove((void *)stp->str_output, (void *)stp->str_iv, sizeof(Block));
+ 
+@@ -547,7 +547,7 @@ cfb64_encrypt(unsigned char *s, int c)
+ 	while (c-- > 0) {
+ 		if (idx == sizeof(Block)) {
+ 			Block b;
+-			des_ecb_encrypt((Block *)stp->str_output, (Block *)b, stp->str_sched, 1);
++			DES_ecb_encrypt((Block *)stp->str_output, (Block *)b, &stp->str_sched, 1);
+ 			memmove((void *)stp->str_feed, (void *)b, sizeof(Block));
+ 			idx = 0;
+ 		}
+@@ -580,7 +580,7 @@ cfb64_decrypt(int data)
+ 	idx = stp->str_index++;
+ 	if (idx == sizeof(Block)) {
+ 		Block b;
+-		des_ecb_encrypt((Block *)stp->str_output, (Block *)b, stp->str_sched, 1);
++		DES_ecb_encrypt((Block *)stp->str_output, (Block *)b, &stp->str_sched, 1);
+ 		memmove((void *)stp->str_feed, (void *)b, sizeof(Block));
+ 		stp->str_index = 1;	/* Next time will be 1 */
+ 		idx = 0;		/* But now use 0 */
+@@ -620,7 +620,7 @@ ofb64_encrypt(unsigned char *s, int c)
+ 	while (c-- > 0) {
+ 		if (idx == sizeof(Block)) {
+ 			Block b;
+-			des_ecb_encrypt((Block *)stp->str_feed, (Block *)b, stp->str_sched, 1);
++			DES_ecb_encrypt((Block *)stp->str_feed, (Block *)b, &stp->str_sched, 1);
+ 			memmove((void *)stp->str_feed, (void *)b, sizeof(Block));
+ 			idx = 0;
+ 		}
+@@ -650,7 +650,7 @@ ofb64_decrypt(int data)
+ 	idx = stp->str_index++;
+ 	if (idx == sizeof(Block)) {
+ 		Block b;
+-		des_ecb_encrypt((Block *)stp->str_feed, (Block *)b, stp->str_sched, 1);
++		DES_ecb_encrypt((Block *)stp->str_feed, (Block *)b, &stp->str_sched, 1);
+ 		memmove((void *)stp->str_feed, (void *)b, sizeof(Block));
+ 		stp->str_index = 1;	/* Next time will be 1 */
+ 		idx = 0;		/* But now use 0 */
+--- a/contrib/telnet/libtelnet/encrypt.h	2015-05-25 21:46:00.875949000 +0200
++++ b/contrib/telnet/libtelnet/encrypt.h	2016-03-07 16:33:23.285801483 +0100
+@@ -67,7 +67,7 @@ typedef unsigned char *BlockT;
+ #if 0
+ typedef struct { Block __; } Schedule[16];
+ #else
+-#define Schedule des_key_schedule
++#define Schedule DES_key_schedule
+ #endif
+ 
+ #define	VALIDKEY(key)	( key[0] | key[1] | key[2] | key[3] | \
+--- a/usr.sbin/ppp/chap_ms.c	2015-05-25 21:48:10.545940000 +0200
++++ b/usr.sbin/ppp/chap_ms.c	2016-03-07 16:35:12.515793317 +0100
+@@ -103,18 +103,18 @@ MakeKey(u_char *key, u_char *des_key)
+     des_key[6] = Get7Bits(key, 42);
+     des_key[7] = Get7Bits(key, 49);
+ 
+-    des_set_odd_parity((des_cblock *)des_key);
++    DES_set_odd_parity((DES_cblock *)des_key);
+ }
+ 
+ static void /* IN 8 octets IN 7 octest OUT 8 octets */
+ DesEncrypt(u_char *clear, u_char *key, u_char *cipher)
+ {
+-    des_cblock		des_key;
+-    des_key_schedule	key_schedule;
++    DES_cblock		des_key;
++    DES_key_schedule	key_schedule;
+ 
+     MakeKey(key, des_key);
+-    des_set_key(&des_key, key_schedule);
+-    des_ecb_encrypt((des_cblock *)clear, (des_cblock *)cipher, key_schedule, 1);
++    DES_set_key(&des_key, &key_schedule);
++    DES_ecb_encrypt((DES_cblock *)clear, (DES_cblock *)cipher, &key_schedule, 1);
+ }
+ 
+ static void      /* IN 8 octets      IN 16 octets     OUT 24 octets */
+--- a/share/mk/bsd.own.mk	2016-03-08 10:49:46.631220980 +0100
++++ b/share/mk/bsd.own.mk	2016-03-06 21:31:35.297524022 +0100
+@@ -402,6 +402,7 @@ __DEFAULT_NO_OPTIONS = \
+     DEBUG_FILES \
+     HESIOD \
+     INSTALL_AS_USER \
++    LIBRESSL \
+     LLDB \
+     NAND \
+     OFED \
