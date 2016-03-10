@@ -22,6 +22,8 @@ I had tried to replace OpenSSL in FreeBSD 10 when I was at OpenBSD's LibreSSL ha
 4. Rebuild and install your kernel and world (see the [FreeBSD handbook chapter](https://www.freebsd.org/doc/en_US.ISO8859-1/books/handbook/makeworld.html) for detail)
 5. Reboot
 
+## Commands
+
 As commands (assuming you already have checked out FreeBSD 10.3 into /usr/src)
 
 	#!sh
@@ -42,6 +44,30 @@ Line 3: You should verify the tarball using `signify` or `gpg`.
 Line 11: This should take quite a lot of time (probably hours) and is NOT the canonical way to do this. See the handbook [chapter on rebuilding your system](https://www.freebsd.org/doc/en_US.ISO8859-1/books/handbook/makeworld.html) for a complete description!	
 
 Now that was easy wasn't it?
+
+## Update your ports
+
+After upgrading the kernel and world you'll need to rebuild all ports. If before you had defined
+
+	:::make
+	WITH_OPENSSL_PORT= yes
+	OPENSSL_PORT=	security/libressl-devel
+
+you can now remove these bits, but then you should rebuild world and kernel after every update of LibreSSL. Unless the shared library version -and thus the ABI- stay the same. ## Updating LibreSSL
+
+If LibreSSL receives an update that has the same shared library version, you can use my guidance from [the FreeBSD wiki](https://wiki.freebsd.org/BernardSpil/PartialWorldBuilds) after downloading/extracting the latest LibreSSL tarball as discussed in the previous paragraph.
+
+	#!sh
+	cd /usr/src/secure/lib/libcrypto
+	make obj && make depend && make includes && make
+	make install
+	cd /usr/src/secure/lib/libssl
+	make clean && make depend && make includes && make
+	make install
+	cd /usr/src/secure/usr.bin/openssl
+	make clean && make
+	make install
+
 
 # The detail
 
