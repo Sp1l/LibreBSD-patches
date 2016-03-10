@@ -1,6 +1,8 @@
 # LibreBSD
 Location for the patch-sets to replace OpenSSL with LibreSSL in FreeBSD
 
+![LibreBSD](https://cloud.githubusercontent.com/assets/7547697/13683368/9a2d31f0-e706-11e5-8c72-4f66273040ac.png)
+
 **Before you ask:** This will not be a fork! I intend to maintain this as a patch-set for the most recent release of [FreeBSD](https://freebsd.org) and will maintain it for [HardenedBSD](https://hardenedbsd.org) as well.
 
 Over the past weekend I managed to get LibreSSL to build, and all binaries to link to it on HardenedBSD. The patches were created on a derivative of the -to be released later this year- FreeBSD 11. See my earlier blog-posts for more details ([Part I](/libressl/2016-03-05/libressl-in-hardenedbsd-base-part-i.html) and [Part II](/libressl/2016-03-06/libressl-in-hardenedbsd-base-part-ii.html)).
