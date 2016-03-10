@@ -55,6 +55,14 @@ After upgrading the kernel and world you'll need to rebuild all ports. If before
 
 you can now remove these bits, but then you should rebuild world and kernel after every update of LibreSSL. Unless the shared library version -and thus the ABI- stay the same. ## Updating LibreSSL
 
+## Updating LibreSSL
+
+LibreSSL frequently changes the shared library version -as proper software does-. Yet at times a new version is released that retains the same shared library version as the previous release.
+
+**The files here will also be updated shortly after every LibreSSL release**
+
+### Shared library versions unchanged
+
 If LibreSSL receives an update that has the same shared library version, you can use my guidance from [the FreeBSD wiki](https://wiki.freebsd.org/BernardSpil/PartialWorldBuilds) after downloading/extracting the latest LibreSSL tarball as discussed in the previous paragraph.
 
 	#!sh
@@ -68,6 +76,16 @@ If LibreSSL receives an update that has the same shared library version, you can
 	make clean && make
 	make install
 
+### Shared library version changed
+
+The process is largely the same as the complete process, apart from applying the complete patches. The library version needs to be updated in the Makefile corresponding to the library. The files that you need are in files named `VERSION` in the corresponding directory in the LibreSSL sources. Copy that version to the Makefile for the library
+
+	SHLIB_MAJOR=    37
+
+Additionally you should update the following info in `secure/lib/libcrypto/Makefile.inc.libressl`
+
+	OPENSSL_VER=    2.3.2
+	OPENSSL_DATE=   2016-01-28
 
 # The detail
 
