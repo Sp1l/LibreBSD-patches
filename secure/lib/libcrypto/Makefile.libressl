@@ -382,7 +382,8 @@ SRCS+= wp_block.c
 	${LCRYPTO_SRC}/ui \
 	${LCRYPTO_SRC}/whrlpool \
 	${LCRYPTO_SRC}/x509 \
-	${LCRYPTO_SRC}/x509v3
+	${LCRYPTO_SRC}/x509v3 \
+	${LIBRESSL_SRC}/man
 
 explicit_bzero.c:
 	CFLAGS+= -O0
