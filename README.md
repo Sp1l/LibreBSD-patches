@@ -1,6 +1,13 @@
 # LibreBSD
 Location for the patch-sets to replace OpenSSL with LibreSSL in FreeBSD
 
+| Branch | For |
+|--------|-----|
+| FreeBSD-10.3 | [FreeBSD 10.3](https://github.com/freebsd/freebsd/tree/releng/10.3) |
+| master | [FreeBSD HEAD](https://github.com/freebsd/freebsd/tree/master) |
+
+Note: There's no patch-set for the master branch, checkout the repo and use it as overlay for HEAD.
+
 ![LibreBSD](https://cloud.githubusercontent.com/assets/7547697/13683368/9a2d31f0-e706-11e5-8c72-4f66273040ac.png)
 
 **Before you ask:** This will not be a fork! I intend to maintain this as a patch-set for the most recent release of [FreeBSD](https://freebsd.org) and will maintain it for [HardenedBSD](https://hardenedbsd.org) as well.
