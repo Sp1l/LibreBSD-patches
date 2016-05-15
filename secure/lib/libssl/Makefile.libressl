@@ -5,11 +5,11 @@ SHLIB_MAJOR=	38
 
 NO_LINT=
 
-.if exists(Makefile.man)
-#.include "Makefile.man"
+.if exists(Makefile.man.libressl)
+.include "Makefile.man.libressl"
 .endif
 .include "../libcrypto/Makefile.inc.libressl"
-.warning Building LibreSSL ${OPENSSL_VER}
+
 CFLAGS+= -Wall -Wundef
 CFLAGS+= -I${LCRYPTO_SRC} -I${LCRYPTO_SRC}/evp
 
@@ -35,22 +35,11 @@ INCSDIR=${INCLUDEDIR}/openssl
 
 CFLAGS+=	-I${LCRYPTO_SRC}/crypto
 
-LIBADD=	crypto
+DPADD=  ${LIBCRYPTO}
+LDADD=  -lcrypto
 
 .include <bsd.lib.mk>
 
 .PATH:	${LSSL_SRC} \
-	${LIBRESSL_SRC}/include/openssl
-
-.if 1 == 2
-includes:
-	@test -d ${DESTDIR}/usr/include/openssl || \
-	    mkdir ${DESTDIR}/usr/include/openssl
-	@cd ${LSSL_SRC}; for i in $(HDRS); do \
-	    j="cmp -s $$i ${DESTDIR}/usr/include/openssl/`basename $$i` || \
-	    ${INSTALL} ${INSTALL_COPY} -o ${BINOWN} -g ${BINGRP} -m 444 $$i\
-		${DESTDIR}/usr/include/openssl"; \
-	    echo $$j; \
-	    eval "$$j"; \
-	done;
-.endif
+	${LIBRESSL_SRC}/include/openssl \
+	${LIBRESSL_SRC}/man

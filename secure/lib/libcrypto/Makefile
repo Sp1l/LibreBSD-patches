@@ -2,12 +2,10 @@
 
 .include <bsd.own.mk>
 
-.if "${WITH_LIBRESSL}" != "yes"
+.if ${MK_LIBRESSL} == "no"
 
 SHLIBDIR?=	/lib
 SUBDIR=		engines
-
-#.include <bsd.own.mk>
 
 LIB=		crypto
 SHLIB_MAJOR=	7
@@ -476,4 +474,4 @@ _bn_asmpath=	${LCRYPTO_SRC}/crypto/bn/asm
 
 .else
 .include "Makefile.libressl"
-.endif # !"${WITH_LIBRESSL}" == "yes"
+.endif

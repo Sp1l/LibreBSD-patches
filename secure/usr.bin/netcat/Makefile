@@ -4,9 +4,8 @@
 
 PROG=	netcat
 SRCS=	netcat.c atomicio.c socks.c
-
-DPADD=	${LIBSSL} ${LIBCRYPTO} ${LIBTLS}
-LDADD=	-lssl -lcrypto -ltls
+LDADD+= -ltls -lssl -lcrypto
+DPADD+=  ${LIBTLS} ${LIBSSL} ${LIBCRYPTO}
 
 MAN1=	netcat.1
 

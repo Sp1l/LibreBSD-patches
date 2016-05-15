@@ -13,9 +13,8 @@ NO_LINT=
 .if exists(Makefile.man.libressl)
 .include "Makefile.man.libressl"
 .endif
-.include "Makefile.inc.libressl"
 
-.warning Building LibreSSL ${OPENSSL_VER}
+.include "Makefile.inc.libressl"
 
 CFLAGS+= -Wall -Wundef -Werror
 
@@ -388,48 +387,5 @@ SRCS+= wp_block.c
 explicit_bzero.c:
 	CFLAGS+= -O0
 
-HDRS_GEN=\
-	${.CURDIR}/arch/${MACHINE_CPU}/opensslconf.h \
-	${.OBJDIR}/obj_mac.h
-
-sdincludes: 
-	@test -d ${DESTDIR}/usr/include/openssl || \
-	    mkdir ${DESTDIR}/usr/include/openssl
-	@cd ${LSSL_SRC}; \
-	for i in $(HDRS); do \
-	    j="cmp -s $$i ${DESTDIR}/usr/include/openssl/`basename $$i` || \
-	    ${INSTALL} ${INSTALL_COPY} -o ${BINOWN} -g ${BINGRP} -m 444 $$i\
-		${DESTDIR}/usr/include/openssl"; \
-	    echo $$j; \
-	    eval "$$j"; \
-	done; \
-	for i in $(HDRS_GEN); do \
-	    j="cmp -s $$i ${DESTDIR}/usr/include/openssl/`basename $$i` || \
-	    ${INSTALL} ${INSTALL_COPY} -o ${BINOWN} -g ${BINGRP} -m 444 $$i\
-		${DESTDIR}/usr/include/openssl"; \
-	    echo $$j; \
-	    eval "$$j"; \
-	done;
-
-# generated
 CFLAGS+= -I${.OBJDIR}
 
-CLEANFILES=${GENERATED} obj_mac.num.tmp
-
-.if 1 == 2
-
-.if exists (${.CURDIR}/${MACHINE_CPUARCH}/Makefile.inc.libressl)
-.include "${.CURDIR}/${MACHINE_CPUARCH}/Makefile.inc.libressl"
-.else
-CFLAGS+=-DOPENSSL_NO_ASM
-SRCS+= aes_core.c aes_cbc.c
-SRCS+= bf_enc.c
-SRCS+= bn_asm.c
-SRCS+= camellia.c cmll_cbc.c cmll_misc.c
-SRCS+= des_enc.c fcrypt_b.c
-SRCS+= rc4_enc.c rc4_skey.c
-SRCS+= wp_block.c
-.endif
-.endif # 1 == 2
-
-all beforedepend: ${GENERATED}

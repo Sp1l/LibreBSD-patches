@@ -1,8 +1,8 @@
-# $FreeBSD: releng/10.3/secure/lib/libssl/Makefile 246772 2013-02-13 23:07:20Z jkim $
+# $FreeBSD$
 
 .include <bsd.own.mk>
 
-.if "${WITH_LIBRESSL}" != "yes"
+.if ${MK_LIBRESSL} == "no"
 
 LIB=		ssl
 SHLIB_MAJOR=	7
@@ -35,4 +35,4 @@ LDADD=	-lcrypto
 
 .else
 .include "Makefile.libressl"
-.endif # !"${WITH_LIBRESSL}" == "yes"
+.endif
