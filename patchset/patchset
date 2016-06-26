@@ -1,6 +1,6 @@
 Index: contrib/telnet/libtelnet/enc_des.c
 ===================================================================
---- contrib/telnet/libtelnet/enc_des.c	(revision 296656)
+--- contrib/telnet/libtelnet/enc_des.c	(revision 301781)
 +++ contrib/telnet/libtelnet/enc_des.c	(working copy)
 @@ -207,9 +207,9 @@
  		/*
@@ -80,7 +80,7 @@ Index: contrib/telnet/libtelnet/enc_des.c
  		idx = 0;		/* But now use 0 */
 Index: contrib/telnet/libtelnet/encrypt.h
 ===================================================================
---- contrib/telnet/libtelnet/encrypt.h	(revision 296656)
+--- contrib/telnet/libtelnet/encrypt.h	(revision 301781)
 +++ contrib/telnet/libtelnet/encrypt.h	(working copy)
 @@ -67,7 +67,7 @@
  #if 0
@@ -93,7 +93,7 @@ Index: contrib/telnet/libtelnet/encrypt.h
  #define	VALIDKEY(key)	( key[0] | key[1] | key[2] | key[3] | \
 Index: contrib/telnet/libtelnet/pk.c
 ===================================================================
---- contrib/telnet/libtelnet/pk.c	(revision 296656)
+--- contrib/telnet/libtelnet/pk.c	(revision 301781)
 +++ contrib/telnet/libtelnet/pk.c	(working copy)
 @@ -129,7 +129,7 @@
          mp_pow(public, secret, modulus, common);
@@ -143,7 +143,7 @@ Index: contrib/telnet/libtelnet/pk.c
  }
 Index: contrib/telnet/libtelnet/pk.h
 ===================================================================
---- contrib/telnet/libtelnet/pk.h	(revision 296656)
+--- contrib/telnet/libtelnet/pk.h	(revision 301781)
 +++ contrib/telnet/libtelnet/pk.h	(working copy)
 @@ -32,7 +32,7 @@
  /* header for the des routines that we will use */
@@ -156,7 +156,7 @@ Index: contrib/telnet/libtelnet/pk.h
  #define DES_ENCRYPT 1
 Index: crypto/heimdal/lib/krb5/crypto-rand.c
 ===================================================================
---- crypto/heimdal/lib/krb5/crypto-rand.c	(revision 296656)
+--- crypto/heimdal/lib/krb5/crypto-rand.c	(revision 301781)
 +++ crypto/heimdal/lib/krb5/crypto-rand.c	(working copy)
 @@ -66,6 +66,7 @@
  	krb5_context context;
@@ -177,7 +177,7 @@ Index: crypto/heimdal/lib/krb5/crypto-rand.c
  	   can use that and failover to another method. */
 Index: secure/lib/Makefile
 ===================================================================
---- secure/lib/Makefile	(revision 296656)
+--- secure/lib/Makefile	(revision 301781)
 +++ secure/lib/Makefile	(working copy)
 @@ -8,7 +8,10 @@
  .if ${MK_OPENSSH} != "no"
@@ -192,14 +192,14 @@ Index: secure/lib/Makefile
  SUBDIR+=tests
 Index: secure/lib/libcrypto/Makefile
 ===================================================================
---- secure/lib/libcrypto/Makefile	(revision 296656)
+--- secure/lib/libcrypto/Makefile	(revision 301781)
 +++ secure/lib/libcrypto/Makefile	(working copy)
 @@ -1,9 +1,13 @@
  # $FreeBSD$
  
 +.include <bsd.own.mk>
 +
-+.if "${WITH_LIBRESSL}" != "yes"
++.if !defined(WITH_LIBRESSL)
 +
  SHLIBDIR?=	/lib
  SUBDIR=		engines
@@ -227,8 +227,8 @@ Index: secure/lib/libcrypto/Makefile.inc.libressl
 +.include <bsd.own.mk>
 +
 +# OpenSSL version used for manual page generation
-+OPENSSL_VER=	2.3.2
-+OPENSSL_DATE=	2016-01-28
++OPENSSL_VER=	2.4.1
++OPENSSL_DATE=	2016-06-07
 +
 +LIBRESSL_SRC=	${.CURDIR}/../../../crypto/libressl
 +LCRYPTO_SRC=	${LIBRESSL_SRC}/crypto
@@ -293,7 +293,7 @@ Index: secure/lib/libcrypto/Makefile.libressl
 ===================================================================
 --- secure/lib/libcrypto/Makefile.libressl	(revision 0)
 +++ secure/lib/libcrypto/Makefile.libressl	(working copy)
-@@ -0,0 +1,435 @@
+@@ -0,0 +1,433 @@
 +# $OpenBSD: Makefile,v 1.67 2015/10/19 16:32:37 beck Exp $
 +
 +SHLIBDIR?=      /lib
@@ -301,7 +301,7 @@ Index: secure/lib/libcrypto/Makefile.libressl
 +.include <bsd.own.mk>
 +
 +LIB=            crypto
-+SHLIB_MAJOR=    37
++SHLIB_MAJOR=    38
 +ALLOW_SHARED_TEXTREL=
 +
 +NO_LINT=
@@ -311,9 +311,7 @@ Index: secure/lib/libcrypto/Makefile.libressl
 +.endif
 +.include "Makefile.inc.libressl"
 +
-+.warning Building LibreSSL ${OPENSSL_VER}
-+
-+CFLAGS+= -Wall -Wundef -Werror
++CFLAGS+= -Wall -Wundef -Werror -fpic -DPIC
 +
 +.if ${MACHINE_ARCH} == "sparc"
 +PICFLAG=-fPIC
@@ -1887,19 +1885,26 @@ Added: svn:mime-type
 \ No newline at end of property
 Index: secure/lib/libssl/Makefile
 ===================================================================
---- secure/lib/libssl/Makefile	(revision 296656)
+--- secure/lib/libssl/Makefile	(revision 301781)
 +++ secure/lib/libssl/Makefile	(working copy)
-@@ -1,5 +1,9 @@
+@@ -1,10 +1,16 @@
  # $FreeBSD$
  
 +.include <bsd.own.mk>
 +
-+.if "${WITH_LIBRESSL}" != "yes"
++.if !defined(WITH_LIBRESSL)
 +
  LIB=		ssl
  SHLIB_MAJOR=	7
  
-@@ -28,3 +32,7 @@
+ NO_LINT=
+ 
++CFLAGS+=	-fPIC -DPIC
++
+ .if exists(Makefile.man)
+ .include "Makefile.man"
+ .endif
+@@ -28,3 +34,7 @@
  
  .PATH:	${LCRYPTO_SRC}/ssl \
  	${.CURDIR}/man
@@ -1915,7 +1920,7 @@ Index: secure/lib/libssl/Makefile.libressl
 +# $OpenBSD: Makefile,v 1.56 2015/09/11 17:54:23 jsing Exp $
 +
 +LIB=	ssl
-+SHLIB_MAJOR=	38
++SHLIB_MAJOR=	39
 +
 +NO_LINT=
 +
@@ -1995,7 +2000,7 @@ Index: secure/lib/libtls/Makefile
 +CFLAGS+= -Wall -Werror -Wimplicit
 +
 +LIB=	tls
-+SHLIB_MAJOR=	10
++SHLIB_MAJOR=	11
 +
 +LTLS_SRC=	${LIBRESSL_SRC}/tls
 +
@@ -2088,7 +2093,7 @@ Added: svn:mime-type
 \ No newline at end of property
 Index: secure/usr.bin/Makefile
 ===================================================================
---- secure/usr.bin/Makefile	(revision 296656)
+--- secure/usr.bin/Makefile	(revision 301781)
 +++ secure/usr.bin/Makefile	(working copy)
 @@ -8,7 +8,10 @@
  .if ${MK_OPENSSH} != "no"
@@ -2687,14 +2692,14 @@ Added: svn:mime-type
 \ No newline at end of property
 Index: secure/usr.bin/openssl/Makefile
 ===================================================================
---- secure/usr.bin/openssl/Makefile	(revision 296656)
+--- secure/usr.bin/openssl/Makefile	(revision 301781)
 +++ secure/usr.bin/openssl/Makefile	(working copy)
 @@ -1,5 +1,9 @@
  # $FreeBSD$
  
 +.include <bsd.own.mk>
 +
-+.if "${WITH_LIBRESSL}" != "yes"
++.if !defined(WITH_LIBRESSL)
 +.warning Building OpenSSL
  PROG=	openssl
  
@@ -2756,7 +2761,7 @@ Added: svn:mime-type
 \ No newline at end of property
 Index: share/mk/bsd.own.mk
 ===================================================================
---- share/mk/bsd.own.mk	(revision 296656)
+--- share/mk/bsd.own.mk	(revision 301781)
 +++ share/mk/bsd.own.mk	(working copy)
 @@ -402,6 +402,7 @@
      DEBUG_FILES \
@@ -2768,7 +2773,7 @@ Index: share/mk/bsd.own.mk
      OFED \
 Index: usr.sbin/ppp/chap_ms.c
 ===================================================================
---- usr.sbin/ppp/chap_ms.c	(revision 296656)
+--- usr.sbin/ppp/chap_ms.c	(revision 301781)
 +++ usr.sbin/ppp/chap_ms.c	(working copy)
 @@ -103,18 +103,18 @@
      des_key[6] = Get7Bits(key, 42);
