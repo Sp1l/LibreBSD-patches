@@ -29,11 +29,11 @@ As commands (assuming you already have checked out FreeBSD 10.3 into /usr/src)
 	#!sh
 	cd ~
 	mkdir download && cd download
-	fetch http://ftp.openbsd.org/pub/OpenBSD/LibreSSL/libressl-2.3.2.tar.gz
+	fetch http://ftp.openbsd.org/pub/OpenBSD/LibreSSL/libressl-2.4.1.tar.gz
 	fetch https://github.com/Sp1l/LibreBSD/raw/FreeBSD-10.3/patchset/patchset
 	cd /usr/src/crypto
-	tar xf ~/download/libressl-2.3.2.tar.gz
-	mv libressl-2.3.2 libressl
+	tar xf ~/download/libressl-2.4.1.tar.gz
+	mv libressl-2.4.1 libressl
 	cd /usr/src
 	patch < ~/download/patchset
 	echo 'WITH_LIBRESSL=yes' >> /etc/src.conf
