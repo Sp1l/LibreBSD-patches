@@ -9,7 +9,7 @@ SUBDIR+=bdes openssl
 SUBDIR+=scp sftp ssh ssh-add ssh-agent ssh-keygen ssh-keyscan
 .endif
 .if ${MK_LIBRESSL} != "no"
-SUBDIR+=netcat
+SUBDIR+=nc
 .endif
 .endif
 

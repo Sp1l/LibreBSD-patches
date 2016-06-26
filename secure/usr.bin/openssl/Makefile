@@ -2,8 +2,8 @@
 
 .include <bsd.own.mk>
 
-.if ${MK_LIBRESSL} == "no"
-
+.if !defined(WITH_LIBRESSL)
+.warning Building OpenSSL
 PROG=	openssl
 
 DPADD=	${LIBSSL} ${LIBCRYPTO}
@@ -31,4 +31,4 @@ SRCS+=	app_rand.c apps.c asn1pars.c ca.c ciphers.c cms.c crl.c crl2p7.c \
 
 .else
 .include "Makefile.libressl"
-.endif
+.endif # !"${WITH_LIBRESSL}" == "yes"

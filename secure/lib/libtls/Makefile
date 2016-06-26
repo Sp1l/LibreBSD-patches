@@ -5,12 +5,12 @@
 CFLAGS+= -Wall -Werror -Wimplicit
 
 LIB=	tls
-SHLIB_MAJOR=	10
+SHLIB_MAJOR=	11
 
 LTLS_SRC=	${LIBRESSL_SRC}/tls
 
-DPADD=	${LIBCRYPTO} ${LIBSSL}
-LDADD=	-lssl -lcrypto
+DPADD=	${LIBSSL} ${LIBCRYPTO}
+LDADD=	 -lssl -lcrypto
 
 INCS=	tls.h
 
@@ -23,7 +23,7 @@ SRCS=	tls.c \
 	tls_util.c \
 	tls_verify.c
 
-.PATH:	${LTLS_SRC} \
+.PATH: ${LTLS_SRC} \
 	${LIBRESSL_SRC}/include \
 	${LIBRESSL_SRC}/man
 
