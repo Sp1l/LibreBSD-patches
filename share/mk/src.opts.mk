@@ -119,7 +119,6 @@ __DEFAULT_YES_OPTIONS = \
     LEGACY_CONSOLE \
     LIB32 \
     LIBPTHREAD \
-    LIBRESSL \
     LIBTHR \
     LOCALES \
     LOCATE \
@@ -184,6 +183,7 @@ __DEFAULT_NO_OPTIONS = \
     DTRACE_TESTS \
     EISA \
     HESIOD \
+    LIBRESSL \
     LIBSOFT \
     NAND \
     OFED \
