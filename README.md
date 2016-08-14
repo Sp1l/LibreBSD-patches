@@ -1,13 +1,15 @@
 # LibreBSD
 Location for the patch-sets to replace OpenSSL with LibreSSL in FreeBSD
 
-| Branch | For |
-|--------|-----|
-| FreeBSD-10.3 | [FreeBSD 10.3](https://github.com/freebsd/freebsd/tree/releng/10.3) |
-| FreeBSD-11.0 | [FreeBSD-11.0](https://github.com/freebsd/freebsd/tree/releng/11.0) |
-| master | [FreeBSD HEAD](https://github.com/freebsd/freebsd/tree/master) |
+| Branch | For | Status |
+|--------|-----|--------|
+| FreeBSD-10.3 | [FreeBSD 10.3](https://github.com/freebsd/freebsd/tree/releng/10.3) | No longer maintained |
+| FreeBSD-11.0 | [FreeBSD-11.0](https://github.com/freebsd/freebsd/tree/releng/11.0) | Currently maintained |
+| master | [FreeBSD HEAD](https://github.com/freebsd/freebsd/tree/master) | Needs updating |
 
 Note: There's no patch-set for the master branch, checkout the repo and use it as overlay for HEAD.
+
+@attilagyorffy created a [complete repo](https://github.com/attilagyorffy/freebsd/tree/10.3-libressl) for 10.3 with the patches included.
 
 ![LibreBSD](https://cloud.githubusercontent.com/assets/7547697/13683368/9a2d31f0-e706-11e5-8c72-4f66273040ac.png)
 
@@ -26,7 +28,7 @@ I had tried to replace OpenSSL in FreeBSD 10 when I was at OpenBSD's LibreSSL ha
 1. Download the [LibreSSL 2.4 tarball](http://ftp.openbsd.org/pub/OpenBSD/LibreSSL/libressl-2.4.2.tar.gz)
   * Extract this tarball into /usr/src/crypto and rename the directory from `libressl-2.4.2` to `libressl`
 2. Apply the patch-set from [my GitHub repo](https://github.com/Sp1l/LibreBSD/tree/FreeBSD-11.0/patchset)
-3. Add WITH_LIBRESSL=yes to /etc/src.conf
+3. (Add WITH_LIBRESSL=yes to /etc/src.conf) No longer required as it now is enabled by default
 4. Rebuild and install your kernel and world (see the [FreeBSD handbook chapter](https://www.freebsd.org/doc/en_US.ISO8859-1/books/handbook/makeworld.html) for detail)
 5. Reboot
 
