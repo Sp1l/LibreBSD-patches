@@ -76,6 +76,7 @@ seed_something(void)
 	    krb5_free_context(context);
 	}
 #endif
+
 #else
 	/* TODO: Once a Windows CryptoAPI RAND method is defined, we
 	   can use that and failover to another method. */

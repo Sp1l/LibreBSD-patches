@@ -1,4 +1,6 @@
-# $FreeBSD$
+# $FreeBSD: releng/11.0/secure/lib/libssl/Makefile 290460 2015-11-06 17:39:17Z jkim $
+
+.include <src.opts.mk>
 
 .if !defined(WITH_LIBRESSL)
 
@@ -6,6 +8,8 @@ LIB=		ssl
 SHLIB_MAJOR=	8
 
 NO_LINT=
+
+CFLAGS+=	-fPIC -DPIC
 
 .if exists(Makefile.man)
 .include "Makefile.man"
@@ -25,6 +29,8 @@ INCSDIR=${INCLUDEDIR}/openssl
 
 LIBADD=	crypto
 
+CFLAGS+=	-I${LCRYPTO_SRC}/crypto
+
 .include <bsd.lib.mk>
 
 .PATH:	${LCRYPTO_SRC}/ssl \
@@ -32,4 +38,4 @@ LIBADD=	crypto
 
 .else
 .include "Makefile.libressl"
-.endif
+.endif # !"${WITH_LIBRESSL}" == "yes"

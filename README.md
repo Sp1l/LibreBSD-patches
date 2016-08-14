@@ -4,6 +4,7 @@ Location for the patch-sets to replace OpenSSL with LibreSSL in FreeBSD
 | Branch | For |
 |--------|-----|
 | FreeBSD-10.3 | [FreeBSD 10.3](https://github.com/freebsd/freebsd/tree/releng/10.3) |
+| FreeBSD-11.0 | [FreeBSD-11.0](https://github.com/freebsd/freebsd/tree/releng/11.0) |
 | master | [FreeBSD HEAD](https://github.com/freebsd/freebsd/tree/master) |
 
 Note: There's no patch-set for the master branch, checkout the repo and use it as overlay for HEAD.
@@ -36,11 +37,11 @@ As commands (assuming you already have checked out FreeBSD 10.3 into /usr/src)
 	#!sh
 	cd ~
 	mkdir download && cd download
-	fetch http://ftp.openbsd.org/pub/OpenBSD/LibreSSL/libressl-2.3.2.tar.gz
+	fetch http://ftp.openbsd.org/pub/OpenBSD/LibreSSL/libressl-2.4.2.tar.gz
 	fetch https://github.com/Sp1l/LibreBSD/raw/FreeBSD-10.3/patchset/patchset
 	cd /usr/src/crypto
-	tar xf ~/download/libressl-2.3.2.tar.gz
-	mv libressl-2.3.2 libressl
+	tar xf ~/download/libressl-2.4.2.tar.gz
+	mv libressl-2.4.2 libressl
 	cd /usr/src
 	patch < ~/download/patchset
 	echo 'WITH_LIBRESSL=yes' >> /etc/src.conf
@@ -57,8 +58,7 @@ Now that was easy wasn't it?
 After upgrading the kernel and world you'll need to rebuild all ports. If before you had defined
 
 	:::make
-	WITH_OPENSSL_PORT= yes
-	OPENSSL_PORT=	security/libressl-devel
+	DEFAULT_VERSIONS+=	ssl:libressl-devel
 
 you can now remove these bits, but then you should rebuild world and kernel after every update of LibreSSL. Unless the shared library version -and thus the ABI- stay the same. ## Updating LibreSSL
 
@@ -91,8 +91,8 @@ The process is largely the same as the complete process, apart from applying the
 
 Additionally you should update the following info in `secure/lib/libcrypto/Makefile.inc.libressl`
 
-	OPENSSL_VER=    2.3.2
-	OPENSSL_DATE=   2016-01-28
+	OPENSSL_VER=    2.4.2
+	OPENSSL_DATE=   2016-08-01
 
 # The detail
 
@@ -117,6 +117,4 @@ The bulk of the patches I created for HardenedBSD just worked just fine on 10.3
 
 Most of the patches that I created for HardenedBSD applied cleanly.
 
-1. The patches for `libtelnet` and `ppp` worked fine.
-2. The `wpa` patches are not required, in 10.3 there's a much older version that doesn't have all the OpenSSL version checks.
-3. The `heimdal` patches I've not yet tested but these patches.
+1. The `wpa` patches are not required for 10.3, there's a much older version that doesn't have all the OpenSSL version checks.

@@ -1,4 +1,4 @@
-# $FreeBSD$
+# $FreeBSD: releng/11.0/secure/lib/Makefile 265420 2014-05-06 04:22:01Z imp $
 
 .include <src.opts.mk>
 
@@ -8,10 +8,9 @@ SUBDIR+=libcrypto libssl
 .if ${MK_OPENSSH} != "no"
 SUBDIR+=libssh
 .endif
-.endif
-
-.if defined(WITH_LIBRESSL)
+.if ${MK_LIBRESSL} != "no"
 SUBDIR+=libtls
+.endif
 .endif
 
 .if ${MK_TESTS} != "no"

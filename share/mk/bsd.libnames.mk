@@ -1,4 +1,4 @@
-# $FreeBSD$
+# $FreeBSD: releng/11.0/share/mk/bsd.libnames.mk 301226 2016-06-02 19:06:04Z lidl $
 
 # The include file <bsd.libnames.mk> define library names.
 # Other include files (e.g. bsd.prog.mk, bsd.lib.mk) include this
@@ -22,6 +22,7 @@ LIBATM?=	${DESTDIR}${LIBDIR}/libatm.a
 LIBAUDITD?=	${DESTDIR}${LIBDIR}/libauditd.a
 LIBAVL?=	${DESTDIR}${LIBDIR}/libavl.a
 LIBBEGEMOT?=	${DESTDIR}${LIBDIR}/libbegemot.a
+LIBBLACKLIST?=	${DESTDIR}${LIBDIR}/libblacklist.a
 LIBBLUETOOTH?=	${DESTDIR}${LIBDIR}/libbluetooth.a
 LIBBSDXML?=	${DESTDIR}${LIBDIR}/libbsdxml.a
 LIBBSM?=	${DESTDIR}${LIBDIR}/libbsm.a
@@ -49,6 +50,7 @@ LIBCXGB4?=	${DESTDIR}${LIBDIR}/libcxgb4.a
 LIBCXXRT?=	${DESTDIR}${LIBDIR}/libcxxrt.a
 LIBC_PIC?=	${DESTDIR}${LIBDIR}/libc_pic.a
 LIBDEVCTL?=	${DESTDIR}${LIBDIR}/libdevctl.a
+LIBDEVDCTL?=	${DESTDIR}${LIBDIR}/libdevdctl.a
 LIBDEVINFO?=	${DESTDIR}${LIBDIR}/libdevinfo.a
 LIBDEVSTAT?=	${DESTDIR}${LIBDIR}/libdevstat.a
 LIBDIALOG?=	${DESTDIR}${LIBDIR}/libdialog.a
