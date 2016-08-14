@@ -34,18 +34,20 @@ I had tried to replace OpenSSL in FreeBSD 10 when I was at OpenBSD's LibreSSL ha
 
 As commands (assuming you already have checked out FreeBSD 11.0 into /usr/src)
 
-	#!sh
-	cd ~
-	mkdir download && cd download
-	fetch http://ftp.openbsd.org/pub/OpenBSD/LibreSSL/libressl-2.4.2.tar.gz
-	fetch https://raw.githubusercontent.com/Sp1l/LibreBSD/FreeBSD-11.0/patchset/11.0-RC1.svndiff
-	cd /usr/src/crypto
-	tar xf ~/download/libressl-2.4.2.tar.gz
-	mv libressl-2.4.2/* libressl/
-	cd /usr/src
-	patch < ~/download/11.0-RC1.svndiff
-	make buildworld && make buildkernel && make installkernel && make installworld
-	reboot
+```shell
+#!sh
+cd ~
+mkdir download && cd download
+fetch http://ftp.openbsd.org/pub/OpenBSD/LibreSSL/libressl-2.4.2.tar.gz
+fetch https://raw.githubusercontent.com/Sp1l/LibreBSD/FreeBSD-11.0/patchset/11.0-RC1.svndiff
+cd /usr/src/crypto
+tar xf ~/download/libressl-2.4.2.tar.gz
+mv libressl-2.4.2/* libressl/
+cd /usr/src
+patch < ~/download/11.0-RC1.svndiff
+make buildworld && make buildkernel && make installkernel && make installworld
+reboot
+```
 
 Line 3: You should verify the tarball using `signify` or `gpg`.	
 Line 11: This should take quite a lot of time (probably hours) and is NOT the canonical way to do this. See the handbook [chapter on rebuilding your system](https://www.freebsd.org/doc/en_US.ISO8859-1/books/handbook/makeworld.html) for a complete description!	
@@ -56,11 +58,12 @@ Now that was easy wasn't it?
 
 After upgrading the kernel and world you'll need to rebuild all ports. If before you had defined
 
-	:::make
-	DEFAULT_VERSIONS+=	ssl:libressl-devel
-	# The old way of doing this
-	# WITH_OPENSSL_PORT=	yes
-	# OPENSSL_PORT=		security/libressl-devel
+```make
+DEFAULT_VERSIONS+=	ssl:libressl-devel
+# The old way of doing this
+# WITH_OPENSSL_PORT=	yes
+# OPENSSL_PORT=		security/libressl-devel
+```
 
 you can now remove these lines, but then you should rebuild world and kernel after every update of LibreSSL. Unless the shared library version -and thus the ABI- stay the same. ## Updating LibreSSL
 
@@ -74,27 +77,29 @@ LibreSSL frequently changes the shared library version -as proper software does-
 
 If LibreSSL receives an update that has the same shared library version, you can use my guidance from [the FreeBSD wiki](https://wiki.freebsd.org/BernardSpil/PartialWorldBuilds) after downloading/extracting the latest LibreSSL tarball as discussed in the previous paragraph.
 
-	#!sh
-	cd /usr/src/secure/lib/libcrypto
-	make obj && make depend && make includes && make
-	make install
-	cd /usr/src/secure/lib/libssl
-	make clean && make depend && make includes && make
-	make install
-	cd /usr/src/secure/usr.bin/openssl
-	make clean && make
-	make install
+```shell
+#!sh
+cd /usr/src/secure/lib/libcrypto
+make obj && make depend && make includes && make
+make install
+cd /usr/src/secure/lib/libssl
+make clean && make depend && make includes && make
+make install
+cd /usr/src/secure/usr.bin/openssl
+make clean && make
+make install
+```
 
 ### Shared library version changed
 
 The process is largely the same as the complete process, apart from applying the complete patches. The library version needs to be updated in the Makefile corresponding to the library. The files that you need are in files named `VERSION` in the corresponding directory in the LibreSSL sources. Copy that version to the Makefile for the library
 
-	SHLIB_MAJOR=    38
+    SHLIB_MAJOR=    38
 
 Additionally you should update the following info in `secure/lib/libcrypto/Makefile.inc.libressl`
 
-	OPENSSL_VER=    2.4.2
-	OPENSSL_DATE=   2016-08-01
+    OPENSSL_VER=    2.4.2
+    OPENSSL_DATE=   2016-08-01
 
 # The detail
 
@@ -104,14 +109,16 @@ Next to the patchset, I've also added all the files that were changed to my GitH
 
 FreeBSD 11 changed quite a lot in the build framework, so I had to adapt the patches for libcrypto, libssl and openssl accordingly. This made the build for the `openssl` binary fail, so I had to change
 
-	:::make
+```make
 	LIBADD+= crypto ssl
+```
 
 into
 
-	:::make
+```make
 	DPADD=  ${LIBSSL} ${LIBCRYPTO}
 	LDADD=  -lssl -lcrypto
+```
 
 The bulk of the patches I created for HardenedBSD just worked just fine on 10.3 
 
