@@ -15,7 +15,7 @@ Note: There's no patch-set for the master branch, checkout the repo and use it a
 
 Over the past weekend I managed to get LibreSSL to build, and all binaries to link to it on HardenedBSD. The patches were created on a derivative of the -to be released later this year- FreeBSD 11. See my earlier blog-posts for more details ([Part I](/libressl/2016-03-05/libressl-in-hardenedbsd-base-part-i.html) and [Part II](/libressl/2016-03-06/libressl-in-hardenedbsd-base-part-ii.html)).
 
-I had tried to replace OpenSSL in FreeBSD 10 when I was at OpenBSD's LibreSSL hackathon in Varaždin (Croatia) last year but hadn't managed to complete the project. The release of LibreSSL 2.3 also removed SSLv3 so my attention was on fixing fallout from that removal. 'Evidence' of that work and the patches can be found in [the No-SSLv3](https://wiki.freebsd.org/OpenSSL/No-SSLv3) wiki article. As it turned out this time, it wasn't extremely difficult to do so I thought it wouldn't take too much time to do this for FreeBSD 10 as well. FreeBSD 10.3 is nearing its completion, so where better to start than with the current first Release Candidate!
+I had tried to replace OpenSSL in FreeBSD 10 when I was at OpenBSD's LibreSSL hackathon in Varaždin (Croatia) last year but hadn't managed to complete the project. The release of LibreSSL 2.4 also removed SSLv3 so my attention was on fixing fallout from that removal. 'Evidence' of that work and the patches can be found in [the No-SSLv3](https://wiki.freebsd.org/OpenSSL/No-SSLv3) wiki article. As it turned out this time, it wasn't extremely difficult to do so I thought it wouldn't take too much time to do this for FreeBSD 10 as well. FreeBSD 10.3 is nearing its completion, so where better to start than with the current first Release Candidate!
 
 **Feedback appreciated:** I haven't replayed all the steps here, do let me know where I've hidden my typos and mistakes! (email, Twitter, GitHub, Facebook, avionary)
 
@@ -23,28 +23,27 @@ I had tried to replace OpenSSL in FreeBSD 10 when I was at OpenBSD's LibreSSL ha
 
 **You'll need to select the correct branch for your FreeBSD version**
 
-1. Download the [LibreSSL 2.3 tarball](http://ftp.openbsd.org/pub/OpenBSD/LibreSSL/libressl-2.3.2.tar.gz)
-  * Extract this tarball into /usr/src/crypto and rename the directory from `libressl-2.3.2` to `libressl`
-2. Apply the patch-set from [my GitHub repo](https://github.com/Sp1l/LibreBSD/tree/FreeBSD-10.3/patchset)
+1. Download the [LibreSSL 2.4 tarball](http://ftp.openbsd.org/pub/OpenBSD/LibreSSL/libressl-2.4.2.tar.gz)
+  * Extract this tarball into /usr/src/crypto and rename the directory from `libressl-2.4.2` to `libressl`
+2. Apply the patch-set from [my GitHub repo](https://github.com/Sp1l/LibreBSD/tree/FreeBSD-11.0/patchset)
 3. Add WITH_LIBRESSL=yes to /etc/src.conf
 4. Rebuild and install your kernel and world (see the [FreeBSD handbook chapter](https://www.freebsd.org/doc/en_US.ISO8859-1/books/handbook/makeworld.html) for detail)
 5. Reboot
 
 ## Commands
 
-As commands (assuming you already have checked out FreeBSD 10.3 into /usr/src)
+As commands (assuming you already have checked out FreeBSD 11.0 into /usr/src)
 
 	#!sh
 	cd ~
 	mkdir download && cd download
 	fetch http://ftp.openbsd.org/pub/OpenBSD/LibreSSL/libressl-2.4.2.tar.gz
-	fetch https://github.com/Sp1l/LibreBSD/raw/FreeBSD-10.3/patchset/patchset
+	fetch https://raw.githubusercontent.com/Sp1l/LibreBSD/FreeBSD-11.0/patchset/11.0-RC1.svndiff
 	cd /usr/src/crypto
 	tar xf ~/download/libressl-2.4.2.tar.gz
-	mv libressl-2.4.2 libressl
+	mv libressl-2.4.2/* libressl/
 	cd /usr/src
-	patch < ~/download/patchset
-	echo 'WITH_LIBRESSL=yes' >> /etc/src.conf
+	patch < ~/download/11.0-RC1.svndiff
 	make buildworld && make buildkernel && make installkernel && make installworld
 	reboot
 
@@ -59,8 +58,11 @@ After upgrading the kernel and world you'll need to rebuild all ports. If before
 
 	:::make
 	DEFAULT_VERSIONS+=	ssl:libressl-devel
+	# The old way of doing this
+	# WITH_OPENSSL_PORT=	yes
+	# OPENSSL_PORT=		security/libressl-devel
 
-you can now remove these bits, but then you should rebuild world and kernel after every update of LibreSSL. Unless the shared library version -and thus the ABI- stay the same. ## Updating LibreSSL
+you can now remove these lines, but then you should rebuild world and kernel after every update of LibreSSL. Unless the shared library version -and thus the ABI- stay the same. ## Updating LibreSSL
 
 ## Updating LibreSSL
 
@@ -87,7 +89,7 @@ If LibreSSL receives an update that has the same shared library version, you can
 
 The process is largely the same as the complete process, apart from applying the complete patches. The library version needs to be updated in the Makefile corresponding to the library. The files that you need are in files named `VERSION` in the corresponding directory in the LibreSSL sources. Copy that version to the Makefile for the library
 
-	SHLIB_MAJOR=    37
+	SHLIB_MAJOR=    38
 
 Additionally you should update the following info in `secure/lib/libcrypto/Makefile.inc.libressl`
 
