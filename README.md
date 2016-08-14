@@ -46,7 +46,7 @@ cd /usr/src/crypto
 tar xf ~/download/libressl-2.4.2.tar.gz
 mv libressl-2.4.2/* libressl/
 cd /usr/src
-patch < ~/download/11.0-RC1.svndiff
+patch -p0 < ~/download/11.0-RC1.svndiff
 make buildworld && make buildkernel && make installkernel && make installworld
 reboot
 ```
