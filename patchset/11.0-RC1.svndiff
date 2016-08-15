@@ -1,6 +1,6 @@
 Index: contrib/telnet/libtelnet/enc_des.c
 ===================================================================
---- contrib/telnet/libtelnet/enc_des.c	(revision 303985)
+--- contrib/telnet/libtelnet/enc_des.c	(revision 304075)
 +++ contrib/telnet/libtelnet/enc_des.c	(working copy)
 @@ -207,9 +207,9 @@
  		/*
@@ -80,7 +80,7 @@ Index: contrib/telnet/libtelnet/enc_des.c
  		idx = 0;		/* But now use 0 */
 Index: contrib/telnet/libtelnet/encrypt.h
 ===================================================================
---- contrib/telnet/libtelnet/encrypt.h	(revision 303985)
+--- contrib/telnet/libtelnet/encrypt.h	(revision 304075)
 +++ contrib/telnet/libtelnet/encrypt.h	(working copy)
 @@ -67,7 +67,7 @@
  #if 0
@@ -93,7 +93,7 @@ Index: contrib/telnet/libtelnet/encrypt.h
  #define	VALIDKEY(key)	( key[0] | key[1] | key[2] | key[3] | \
 Index: contrib/telnet/libtelnet/pk.c
 ===================================================================
---- contrib/telnet/libtelnet/pk.c	(revision 303985)
+--- contrib/telnet/libtelnet/pk.c	(revision 304075)
 +++ contrib/telnet/libtelnet/pk.c	(working copy)
 @@ -129,7 +129,7 @@
          mp_pow(public, secret, modulus, common);
@@ -143,7 +143,7 @@ Index: contrib/telnet/libtelnet/pk.c
  }
 Index: contrib/telnet/libtelnet/pk.h
 ===================================================================
---- contrib/telnet/libtelnet/pk.h	(revision 303985)
+--- contrib/telnet/libtelnet/pk.h	(revision 304075)
 +++ contrib/telnet/libtelnet/pk.h	(working copy)
 @@ -32,7 +32,7 @@
  /* header for the des routines that we will use */
@@ -156,7 +156,7 @@ Index: contrib/telnet/libtelnet/pk.h
  #define DES_ENCRYPT 1
 Index: contrib/wpa/src/crypto/tls_openssl.c
 ===================================================================
---- contrib/wpa/src/crypto/tls_openssl.c	(revision 303985)
+--- contrib/wpa/src/crypto/tls_openssl.c	(revision 304075)
 +++ contrib/wpa/src/crypto/tls_openssl.c	(working copy)
 @@ -125,7 +125,7 @@
  	X509 *peer_issuer;
@@ -205,7 +205,7 @@ Index: contrib/wpa/src/crypto/tls_openssl.c
  	int ret = -1;
 Index: crypto/heimdal/lib/krb5/crypto-rand.c
 ===================================================================
---- crypto/heimdal/lib/krb5/crypto-rand.c	(revision 303985)
+--- crypto/heimdal/lib/krb5/crypto-rand.c	(revision 304075)
 +++ crypto/heimdal/lib/krb5/crypto-rand.c	(working copy)
 @@ -66,6 +66,7 @@
  	krb5_context context;
@@ -240,7 +240,7 @@ Index: crypto/libressl/README.md
 +as well, updating the version and date
 Index: secure/lib/Makefile
 ===================================================================
---- secure/lib/Makefile	(revision 303985)
+--- secure/lib/Makefile	(revision 304075)
 +++ secure/lib/Makefile	(working copy)
 @@ -8,7 +8,10 @@
  .if ${MK_OPENSSH} != "no"
@@ -255,14 +255,14 @@ Index: secure/lib/Makefile
  SUBDIR+=tests
 Index: secure/lib/libcrypto/Makefile
 ===================================================================
---- secure/lib/libcrypto/Makefile	(revision 303985)
+--- secure/lib/libcrypto/Makefile	(revision 304075)
 +++ secure/lib/libcrypto/Makefile	(working copy)
 @@ -1,9 +1,13 @@
  # $FreeBSD$
  
 +.include <src.opts.mk>
 +
-+.if !defined(WITH_LIBRESSL)
++.if ${MK_LIBRESSL} != "no"
 +
  SHLIBDIR?=	/lib
  SUBDIR=		engines
@@ -279,7 +279,7 @@ Index: secure/lib/libcrypto/Makefile
 +
 +.else
 +.include "Makefile.libressl"
-+.endif # !"${WITH_LIBRESSL}" == "yes"
++.endif # ${MK_LIBRESSL} != "no"
 Index: secure/lib/libcrypto/Makefile.inc.libressl
 ===================================================================
 --- secure/lib/libcrypto/Makefile.inc.libressl	(nonexistent)
@@ -1948,14 +1948,14 @@ Added: svn:mime-type
 \ No newline at end of property
 Index: secure/lib/libssl/Makefile
 ===================================================================
---- secure/lib/libssl/Makefile	(revision 303985)
+--- secure/lib/libssl/Makefile	(revision 304075)
 +++ secure/lib/libssl/Makefile	(working copy)
 @@ -1,10 +1,16 @@
  # $FreeBSD$
  
 +.include <src.opts.mk>
 +
-+.if !defined(WITH_LIBRESSL)
++.if ${MK_LIBRESSL} != "no"
 +
  LIB=		ssl
  SHLIB_MAJOR=	8
@@ -1974,7 +1974,7 @@ Index: secure/lib/libssl/Makefile
 +
 +.else
 +.include "Makefile.libressl"
-+.endif # !"${WITH_LIBRESSL}" == "yes"
++.endif # ${MK_LIBRESSL} != "no"
 Index: secure/lib/libssl/Makefile.libressl
 ===================================================================
 --- secure/lib/libssl/Makefile.libressl	(nonexistent)
@@ -2427,37 +2427,35 @@ Added: svn:mime-type
 \ No newline at end of property
 Index: secure/usr.bin/Makefile
 ===================================================================
---- secure/usr.bin/Makefile	(revision 303985)
+--- secure/usr.bin/Makefile	(revision 304075)
 +++ secure/usr.bin/Makefile	(working copy)
-@@ -8,7 +8,10 @@
+@@ -5,6 +5,11 @@
+ SUBDIR=
+ .if ${MK_OPENSSL} != "no"
+ SUBDIR+=bdes openssl
++.if ${MK_LIBRESSL} != "no"
++.  if ${MK_NETCAT} != "no"
++SUBDIR+=nc
++.  endif
++.endif
  .if ${MK_OPENSSH} != "no"
  SUBDIR+=scp sftp ssh ssh-add ssh-agent ssh-keygen ssh-keyscan
  .endif
-+.if ${MK_LIBRESSL} != "no"
-+SUBDIR+=nc
- .endif
-+.endif
- 
- .if ${MK_TESTS} != "no"
- SUBDIR+=tests
 Index: secure/usr.bin/nc/Makefile
 ===================================================================
 --- secure/usr.bin/nc/Makefile	(nonexistent)
 +++ secure/usr.bin/nc/Makefile	(working copy)
-@@ -0,0 +1,17 @@
+@@ -0,0 +1,14 @@
 +#	$OpenBSD: Makefile,v 1.7 2015/09/11 21:07:01 beck Exp $
 +
 +.include "../../lib/libcrypto/Makefile.inc.libressl"
 +
-+PROG=	netcat
++PROG=	nc
 +SRCS=	netcat.c atomicio.c socks.c
 +
 +LIBADD=	crypto ssl tls
 +
-+MAN1=	netcat.1
-+
-+netcat.1:
-+	cp ${LIBRESSL_SRC}/apps/nc/nc.1 netcat.1
++MAN1=	nc.1
 +
 +.PATH:	${LIBRESSL_SRC}/apps/nc
 +
@@ -3025,26 +3023,25 @@ Added: svn:mime-type
 \ No newline at end of property
 Index: secure/usr.bin/openssl/Makefile
 ===================================================================
---- secure/usr.bin/openssl/Makefile	(revision 303985)
+--- secure/usr.bin/openssl/Makefile	(revision 304075)
 +++ secure/usr.bin/openssl/Makefile	(working copy)
-@@ -1,5 +1,9 @@
+@@ -1,5 +1,8 @@
  # $FreeBSD$
  
 +.include <src.opts.mk>
 +
-+.if !defined(WITH_LIBRESSL)
-+.warning Building OpenSSL
++.if ${MK_LIBRESSL} != "no"
  PROG=	openssl
  
  LIBADD=	ssl crypto
-@@ -23,3 +27,7 @@
+@@ -23,3 +26,7 @@
  
  .PATH:	${LCRYPTO_SRC}/apps \
  	${.CURDIR}/man
 +
 +.else
 +.include "Makefile.libressl"
-+.endif # !"${WITH_LIBRESSL}" == "yes"
++.endif # ${MK_LIBRESSL} != "no"
 Index: secure/usr.bin/openssl/Makefile.libressl
 ===================================================================
 --- secure/usr.bin/openssl/Makefile.libressl	(nonexistent)
@@ -3093,7 +3090,7 @@ Added: svn:mime-type
 \ No newline at end of property
 Index: share/mk/bsd.libnames.mk
 ===================================================================
---- share/mk/bsd.libnames.mk	(revision 303985)
+--- share/mk/bsd.libnames.mk	(revision 304075)
 +++ share/mk/bsd.libnames.mk	(working copy)
 @@ -146,6 +146,7 @@
  LIBTERMCAPW?=	${DESTDIR}${LIBDIR}/libtermcapw.a
@@ -3105,7 +3102,7 @@ Index: share/mk/bsd.libnames.mk
  LIBULOG?=	${DESTDIR}${LIBDIR}/libulog.a
 Index: share/mk/src.libnames.mk
 ===================================================================
---- share/mk/src.libnames.mk	(revision 303985)
+--- share/mk/src.libnames.mk	(revision 304075)
 +++ share/mk/src.libnames.mk	(working copy)
 @@ -159,6 +159,7 @@
  		tacplus \
@@ -3133,7 +3130,7 @@ Index: share/mk/src.libnames.mk
  LIBLNDIR=	${OBJTOP}/usr.bin/lex/lib
 Index: share/mk/src.opts.mk
 ===================================================================
---- share/mk/src.opts.mk	(revision 303985)
+--- share/mk/src.opts.mk	(revision 304075)
 +++ share/mk/src.opts.mk	(working copy)
 @@ -119,6 +119,7 @@
      LEGACY_CONSOLE \
@@ -3143,9 +3140,23 @@ Index: share/mk/src.opts.mk
      LIBTHR \
      LOCALES \
      LOCATE \
+Index: usr.bin/Makefile
+===================================================================
+--- usr.bin/Makefile	(revision 304075)
++++ usr.bin/Makefile	(working copy)
+@@ -240,7 +240,9 @@
+ SUBDIR.${MK_MAN_UTILS}+=	makewhatis
+ .endif
+ SUBDIR.${MK_MAN_UTILS}+=	man
++.if ${MK_LIBRESSL} == "no"
+ SUBDIR.${MK_NETCAT}+=	nc
++.endif
+ SUBDIR.${MK_NIS}+=	ypcat
+ SUBDIR.${MK_NIS}+=	ypmatch
+ SUBDIR.${MK_NIS}+=	ypwhich
 Index: usr.sbin/ppp/chap_ms.c
 ===================================================================
---- usr.sbin/ppp/chap_ms.c	(revision 303985)
+--- usr.sbin/ppp/chap_ms.c	(revision 304075)
 +++ usr.sbin/ppp/chap_ms.c	(working copy)
 @@ -103,18 +103,18 @@
      des_key[6] = Get7Bits(key, 42);
