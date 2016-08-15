@@ -2,7 +2,7 @@
 
 .include <src.opts.mk>
 
-.if !defined(WITH_LIBRESSL)
+.if ${MK_LIBRESSL} != "no"
 
 SHLIBDIR?=	/lib
 SUBDIR=		engines
@@ -479,4 +479,4 @@ _bn_asmpath=	${LCRYPTO_SRC}/crypto/bn/asm
 
 .else
 .include "Makefile.libressl"
-.endif # !"${WITH_LIBRESSL}" == "yes"
+.endif # ${MK_LIBRESSL} != "no"

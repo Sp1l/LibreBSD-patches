@@ -2,7 +2,7 @@
 
 .include <src.opts.mk>
 
-.if !defined(WITH_LIBRESSL)
+.if ${MK_LIBRESSL} != "no"
 
 LIB=		ssl
 SHLIB_MAJOR=	8
@@ -38,4 +38,4 @@ CFLAGS+=	-I${LCRYPTO_SRC}/crypto
 
 .else
 .include "Makefile.libressl"
-.endif # !"${WITH_LIBRESSL}" == "yes"
+.endif # ${MK_LIBRESSL} != "no"

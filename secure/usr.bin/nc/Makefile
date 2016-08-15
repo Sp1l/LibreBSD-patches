@@ -2,15 +2,12 @@
 
 .include "../../lib/libcrypto/Makefile.inc.libressl"
 
-PROG=	netcat
+PROG=	nc
 SRCS=	netcat.c atomicio.c socks.c
 
 LIBADD=	crypto ssl tls
 
-MAN1=	netcat.1
-
-netcat.1:
-	cp ${LIBRESSL_SRC}/apps/nc/nc.1 netcat.1
+MAN1=	nc.1
 
 .PATH:	${LIBRESSL_SRC}/apps/nc
 
