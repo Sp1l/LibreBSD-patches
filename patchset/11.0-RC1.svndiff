@@ -228,16 +228,140 @@ Index: crypto/libressl/README.md
 ===================================================================
 --- crypto/libressl/README.md	(nonexistent)
 +++ crypto/libressl/README.md	(working copy)
-@@ -0,0 +1,9 @@
-+Download the latest LibreSSL tarball from 
-+http://ftp.openbsd.org/pub/OpenBSD/LibreSSL/
-+and untar it into this directory removing the `LibreSSL-2.4.2` prefix
+@@ -0,0 +1,133 @@
++![LibreSSL image](http://www.libressl.org/images/libressl.jpg)
++## Official portable version of [LibreSSL](http://www.libressl.org) ##
 +
-+When updating LibreSSL, do not forget to update
++[![Build Status](https://travis-ci.org/libressl-portable/portable.svg?branch=master)](https://travis-ci.org/libressl-portable/portable)
 +
-+   secure/lib/libcrypto/Makefile.inc.libressl
++LibreSSL is a fork of [OpenSSL](https://www.openssl.org) 1.0.1g developed by the
++[OpenBSD](http://www.openbsd.org) project.  Our goal is to modernize the codebase,
++improve security, and apply best practice development processes from OpenBSD.
 +
-+as well, updating the version and date
++## Compatibility with OpenSSL: ##
++
++LibreSSL is API compatible with OpenSSL 1.0.1, but does not yet include all
++new APIs from OpenSSL 1.0.2 and later. LibreSSL also includes APIs not yet
++present in OpenSSL. The current common API subset is OpenSSL 1.0.1.
++
++LibreSSL is not ABI compatible with any release of OpenSSL, or necessarily
++earlier releases of LibreSSL. You will need to relink your programs to
++LibreSSL in order to use it, just as in moving between major versions of OpenSSL.
++LibreSSL's installed library version numbers are incremented to account for
++ABI and API changes.
++
++## Compatibility with other operating systems: ##
++
++While primarily developed on and taking advantage of APIs available on OpenBSD,
++the LibreSSL portable project attempts to provide working alternatives for
++other operating systems, and assists with improving OS-native implementations
++where possible.
++
++At the time of this writing, LibreSSL is know to build and work on:
++
++* Linux (kernel 3.17 or later recommended)
++* FreeBSD (tested with 9.2 and later)
++* NetBSD (7.0 or later recommended)
++* HP-UX (11i)
++* Solaris (11 and later preferred)
++* Mac OS X (tested with 10.8 and later)
++* AIX (5.3 and later)
++
++LibreSSL also supports the following Windows environments:
++* Microsoft Windows (XP or higher, x86 and x64)
++* Wine (32-bit and 64-bit)
++* Builds with Mingw-w64, Cygwin, and Visual Studio
++
++Official release tarballs are available at your friendly neighborhood
++OpenBSD mirror in directory
++[LibreSSL](http://ftp.openbsd.org/pub/OpenBSD/LibreSSL/),
++although we suggest that you use a [mirror](http://www.openbsd.org/ftp.html).
++
++The LibreSSL portable build framework is also
++[mirrored](https://github.com/libressl-portable/portable) in Github.
++
++Please report bugs either to the public libressl@openbsd.org mailing list,
++or to the github
++[issue tracker](https://github.com/libressl-portable/portable/issues)
++
++Severe vulnerabilities or bugs requiring coordination with OpenSSL can be
++sent to the core team at libressl-security@openbsd.org.
++
++## Prerequisites when building from git ##
++
++If you have checked this source using Git, follow these initial steps to
++prepare the source tree for building:
++
++1. Ensure you have the following packages installed:
++   automake, autoconf, git, libtool, perl, pod2man
++2. Run './autogen.sh' to prepare the source tree for building or
++   run './dist.sh' to prepare a tarball.
++
++## Building LibreSSL ##
++
++Once you have a source tree from Git or FTP, run these commands to build and
++install the package on most systems:
++
++```sh
++./configure   # see ./configure --help for configuration options
++make check    # runs builtin unit tests
++make install  # set DESTDIR= to install to an alternate location
++```
++
++If you wish to use the CMake build system, use these commands:
++
++```sh
++mkdir build
++cd build
++cmake ..
++make
++make test
++```
++
++For faster builds, you can use Ninja as well:
++
++```sh
++mkdir build-ninja
++cd build-ninja
++cmake -G"Ninja" ..
++ninja
++ninja test
++```
++
++### OS specific build information: ###
++
++#### HP-UX (11i) ####
++
++Set the UNIX_STD environment variable to '2003' before running 'configure'
++in order to build with the HP C/aC++ compiler. See the "standards(5)" man
++page for more details.
++
++```sh
++export UNIX_STD=2003
++./configure
++make
++```
++
++#### Windows - Mingw-w64 ####
++
++LibreSSL builds against relatively recent versions of Mingw-w64, not to be
++confused with the original mingw.org project.  Mingw-w64 3.2 or later
++should work. See README.windows for more information
++
++#### Windows - Visual Studio ####
++
++LibreSSL builds using the CMake target "Visual Studio 12 2013", and may build
++against older/newer targets as well. To generate a Visual Studio project,
++install CMake, enter the LibreSSL source directory and run:
++
++```sh
++ mkdir build-vs2013
++ cd build-vs2013
++ cmake -G"Visual Studio 12 2013" ..
++```
++
++This will generate a LibreSSL.sln file that you can incorporate into other
++projects or build by itself.
 Index: secure/lib/Makefile
 ===================================================================
 --- secure/lib/Makefile	(revision 304075)
@@ -2445,7 +2569,7 @@ Index: secure/usr.bin/nc/Makefile
 ===================================================================
 --- secure/usr.bin/nc/Makefile	(nonexistent)
 +++ secure/usr.bin/nc/Makefile	(working copy)
-@@ -0,0 +1,14 @@
+@@ -0,0 +1,16 @@
 +#	$OpenBSD: Makefile,v 1.7 2015/09/11 21:07:01 beck Exp $
 +
 +.include "../../lib/libcrypto/Makefile.inc.libressl"
@@ -2455,6 +2579,8 @@ Index: secure/usr.bin/nc/Makefile
 +
 +LIBADD=	crypto ssl tls
 +
++# Reset man-dir set for LibreSSL
++MANDIR= ${SHAREDIR}/man/man
 +MAN1=	nc.1
 +
 +.PATH:	${LIBRESSL_SRC}/apps/nc
@@ -2475,710 +2601,3 @@ Added: svn:mime-type
 ## -0,0 +1 ##
 +text/plain
 \ No newline at end of property
-Index: secure/usr.bin/nc/netcat.1
-===================================================================
---- secure/usr.bin/nc/netcat.1	(nonexistent)
-+++ secure/usr.bin/nc/netcat.1	(working copy)
-@@ -0,0 +1,526 @@
-+.\"     $OpenBSD: nc.1,v 1.70 2015/09/12 07:56:56 jmc Exp $
-+.\"
-+.\" Copyright (c) 1996 David Sacerdote
-+.\" All rights reserved.
-+.\"
-+.\" Redistribution and use in source and binary forms, with or without
-+.\" modification, are permitted provided that the following conditions
-+.\" are met:
-+.\" 1. Redistributions of source code must retain the above copyright
-+.\"    notice, this list of conditions and the following disclaimer.
-+.\" 2. Redistributions in binary form must reproduce the above copyright
-+.\"    notice, this list of conditions and the following disclaimer in the
-+.\"    documentation and/or other materials provided with the distribution.
-+.\" 3. The name of the author may not be used to endorse or promote products
-+.\"    derived from this software without specific prior written permission
-+.\"
-+.\" THIS SOFTWARE IS PROVIDED BY THE AUTHOR ``AS IS'' AND ANY EXPRESS OR
-+.\" IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES
-+.\" OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED.
-+.\" IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY DIRECT, INDIRECT,
-+.\" INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT
-+.\" NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
-+.\" DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
-+.\" THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
-+.\" (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF
-+.\" THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-+.\"
-+.Dd $Mdocdate: September 12 2015 $
-+.Dt NC 1
-+.Os
-+.Sh NAME
-+.Nm nc
-+.Nd arbitrary TCP and UDP connections and listens
-+.Sh SYNOPSIS
-+.Nm nc
-+.Op Fl 46cDdFhklNnrStUuvz
-+.Op Fl C Ar certfile
-+.Op Fl e Ar name
-+.Op Fl H Ar hash
-+.Op Fl I Ar length
-+.Op Fl i Ar interval
-+.Op Fl K Ar keyfile
-+.Op Fl O Ar length
-+.Op Fl P Ar proxy_username
-+.Op Fl p Ar source_port
-+.Op Fl R Ar CAfile
-+.Op Fl s Ar source
-+.Op Fl T Ar keyword
-+.Op Fl V Ar rtable
-+.Op Fl w Ar timeout
-+.Op Fl X Ar proxy_protocol
-+.Op Fl x Ar proxy_address Ns Op : Ns Ar port
-+.Op Ar destination
-+.Op Ar port
-+.Sh DESCRIPTION
-+The
-+.Nm
-+(or
-+.Nm netcat )
-+utility is used for just about anything under the sun involving TCP,
-+UDP, or
-+.Ux Ns -domain
-+sockets.
-+It can open TCP connections, send UDP packets, listen on arbitrary
-+TCP and UDP ports, do port scanning, and deal with both IPv4 and
-+IPv6.
-+Unlike
-+.Xr telnet 1 ,
-+.Nm
-+scripts nicely, and separates error messages onto standard error instead
-+of sending them to standard output, as
-+.Xr telnet 1
-+does with some.
-+.Pp
-+Common uses include:
-+.Pp
-+.Bl -bullet -offset indent -compact
-+.It
-+simple TCP proxies
-+.It
-+shell-script based HTTP clients and servers
-+.It
-+network daemon testing
-+.It
-+a SOCKS or HTTP ProxyCommand for
-+.Xr ssh 1
-+.It
-+and much, much more
-+.El
-+.Pp
-+The options are as follows:
-+.Bl -tag -width Ds
-+.It Fl 4
-+Forces
-+.Nm
-+to use IPv4 addresses only.
-+.It Fl 6
-+Forces
-+.Nm
-+to use IPv6 addresses only.
-+.It Fl C Ar certfile
-+Specifies the filename from which the public key part of the TLS
-+certificate is loaded, in PEM format.
-+May only be used with TLS.
-+.It Fl c
-+If using a TCP socket to connect or listen, use TLS.
-+Illegal if not using TCP sockets.
-+.It Fl D
-+Enable debugging on the socket.
-+.It Fl d
-+Do not attempt to read from stdin.
-+.It Fl e Ar name
-+Specify the name that must be present in the peer certificate when using TLS.
-+Illegal if not using TLS.
-+.It Fl F
-+Pass the first connected socket using
-+.Xr sendmsg 2
-+to stdout and exit.
-+This is useful in conjunction with
-+.Fl X
-+to have
-+.Nm
-+perform connection setup with a proxy but then leave the rest of the
-+connection to another program (e.g.\&
-+.Xr ssh 1
-+using the
-+.Xr ssh_config 5
-+.Cm ProxyUseFdpass
-+option).
-+.It Fl H Ar hash
-+Specifies the required hash string of the peer certificate when using TLS.
-+The string format required is that used by
-+.Xr tls_peer_cert_hash 3 .
-+Illegal if not using TLS, and may not be used with -T noverify.
-+.It Fl h
-+Prints out
-+.Nm
-+help.
-+.It Fl I Ar length
-+Specifies the size of the TCP receive buffer.
-+.It Fl i Ar interval
-+Specifies a delay time interval between lines of text sent and received.
-+Also causes a delay time between connections to multiple ports.
-+.It Fl K Ar keyfile
-+Specifies the filename from which the private key
-+is loaded in PEM format.
-+May only be used with TLS.
-+.It Fl k
-+Forces
-+.Nm
-+to stay listening for another connection after its current connection
-+is completed.
-+It is an error to use this option without the
-+.Fl l
-+option.
-+When used together with the
-+.Fl u
-+option, the server socket is not connected and it can receive UDP datagrams from
-+multiple hosts.
-+.It Fl l
-+Used to specify that
-+.Nm
-+should listen for an incoming connection rather than initiate a
-+connection to a remote host.
-+It is an error to use this option in conjunction with the
-+.Fl p ,
-+.Fl s ,
-+or
-+.Fl z
-+options.
-+Additionally, any timeouts specified with the
-+.Fl w
-+option are ignored.
-+.It Fl N
-+.Xr shutdown 2
-+the network socket after EOF on the input.
-+Some servers require this to finish their work.
-+.It Fl n
-+Do not do any DNS or service lookups on any specified addresses,
-+hostnames or ports.
-+.It Fl O Ar length
-+Specifies the size of the TCP send buffer.
-+.It Fl P Ar proxy_username
-+Specifies a username to present to a proxy server that requires authentication.
-+If no username is specified then authentication will not be attempted.
-+Proxy authentication is only supported for HTTP CONNECT proxies at present.
-+.It Fl p Ar source_port
-+Specifies the source port
-+.Nm
-+should use, subject to privilege restrictions and availability.
-+It is an error to use this option in conjunction with the
-+.Fl l
-+option.
-+.It Fl R Ar CAfile
-+Specifies the filename from which the root CA bundle for certificate
-+verification is loaded, in PEM format.
-+Illegal if not using TLS.
-+The default is
-+.Pa /etc/ssl/cert.pem .
-+.It Fl r
-+Specifies that source and/or destination ports should be chosen randomly
-+instead of sequentially within a range or in the order that the system
-+assigns them.
-+.It Fl S
-+Enables the RFC 2385 TCP MD5 signature option.
-+.It Fl s Ar source
-+Specifies the IP of the interface which is used to send the packets.
-+For
-+.Ux Ns -domain
-+datagram sockets, specifies the local temporary socket file
-+to create and use so that datagrams can be received.
-+It is an error to use this option in conjunction with the
-+.Fl l
-+option.
-+.It Fl T Ar keyword
-+Change IPv4 TOS value or TLS options.
-+For TLS options
-+.Ar keyword
-+may be one of
-+.Ar tlslegacy ,
-+which allows legacy TLS protocols;
-+.Ar noverify ,
-+which disables certificate verification;
-+.Ar noname ,
-+which disables certificate name checking; or
-+.Ar clientcert ,
-+which requires a client certificate on incoming connections.
-+It is illegal to specify TLS options if not using TLS.
-+.Pp
-+For IPv4 TOS value
-+.Ar keyword
-+may be one of
-+.Ar critical ,
-+.Ar inetcontrol ,
-+.Ar lowdelay ,
-+.Ar netcontrol ,
-+.Ar throughput ,
-+.Ar reliability ,
-+or one of the DiffServ Code Points:
-+.Ar ef ,
-+.Ar af11 ... af43 ,
-+.Ar cs0 ... cs7 ;
-+or a number in either hex or decimal.
-+.It Fl t
-+Causes
-+.Nm
-+to send RFC 854 DON'T and WON'T responses to RFC 854 DO and WILL requests.
-+This makes it possible to use
-+.Nm
-+to script telnet sessions.
-+.It Fl U
-+Specifies to use
-+.Ux Ns -domain
-+sockets.
-+.It Fl u
-+Use UDP instead of the default option of TCP.
-+For
-+.Ux Ns -domain
-+sockets, use a datagram socket instead of a stream socket.
-+If a
-+.Ux Ns -domain
-+socket is used, a temporary receiving socket is created in
-+.Pa /tmp
-+unless the
-+.Fl s
-+flag is given.
-+.It Fl V Ar rtable
-+Set the routing table to be used.
-+.It Fl v
-+Have
-+.Nm
-+give more verbose output.
-+.It Fl w Ar timeout
-+Connections which cannot be established or are idle timeout after
-+.Ar timeout
-+seconds.
-+The
-+.Fl w
-+flag has no effect on the
-+.Fl l
-+option, i.e.\&
-+.Nm
-+will listen forever for a connection, with or without the
-+.Fl w
-+flag.
-+The default is no timeout.
-+.It Fl X Ar proxy_protocol
-+Requests that
-+.Nm
-+should use the specified protocol when talking to the proxy server.
-+Supported protocols are
-+.Dq 4
-+(SOCKS v.4),
-+.Dq 5
-+(SOCKS v.5)
-+and
-+.Dq connect
-+(HTTPS proxy).
-+If the protocol is not specified, SOCKS version 5 is used.
-+.It Fl x Ar proxy_address Ns Op : Ns Ar port
-+Requests that
-+.Nm
-+should connect to
-+.Ar destination
-+using a proxy at
-+.Ar proxy_address
-+and
-+.Ar port .
-+If
-+.Ar port
-+is not specified, the well-known port for the proxy protocol is used (1080
-+for SOCKS, 3128 for HTTPS).
-+.It Fl z
-+Specifies that
-+.Nm
-+should just scan for listening daemons, without sending any data to them.
-+It is an error to use this option in conjunction with the
-+.Fl l
-+option.
-+.El
-+.Pp
-+.Ar destination
-+can be a numerical IP address or a symbolic hostname
-+(unless the
-+.Fl n
-+option is given).
-+In general, a destination must be specified,
-+unless the
-+.Fl l
-+option is given
-+(in which case the local host is used).
-+For
-+.Ux Ns -domain
-+sockets, a destination is required and is the socket path to connect to
-+(or listen on if the
-+.Fl l
-+option is given).
-+.Pp
-+.Ar port
-+can be a single integer or a range of ports.
-+Ranges are in the form nn-mm.
-+In general,
-+a destination port must be specified,
-+unless the
-+.Fl U
-+option is given.
-+.Sh CLIENT/SERVER MODEL
-+It is quite simple to build a very basic client/server model using
-+.Nm .
-+On one console, start
-+.Nm
-+listening on a specific port for a connection.
-+For example:
-+.Pp
-+.Dl $ nc -l 1234
-+.Pp
-+.Nm
-+is now listening on port 1234 for a connection.
-+On a second console
-+.Pq or a second machine ,
-+connect to the machine and port being listened on:
-+.Pp
-+.Dl $ nc 127.0.0.1 1234
-+.Pp
-+There should now be a connection between the ports.
-+Anything typed at the second console will be concatenated to the first,
-+and vice-versa.
-+After the connection has been set up,
-+.Nm
-+does not really care which side is being used as a
-+.Sq server
-+and which side is being used as a
-+.Sq client .
-+The connection may be terminated using an
-+.Dv EOF
-+.Pq Sq ^D .
-+.Sh DATA TRANSFER
-+The example in the previous section can be expanded to build a
-+basic data transfer model.
-+Any information input into one end of the connection will be output
-+to the other end, and input and output can be easily captured in order to
-+emulate file transfer.
-+.Pp
-+Start by using
-+.Nm
-+to listen on a specific port, with output captured into a file:
-+.Pp
-+.Dl $ nc -l 1234 \*(Gt filename.out
-+.Pp
-+Using a second machine, connect to the listening
-+.Nm
-+process, feeding it the file which is to be transferred:
-+.Pp
-+.Dl $ nc -N host.example.com 1234 \*(Lt filename.in
-+.Pp
-+After the file has been transferred, the connection will close automatically.
-+.Sh TALKING TO SERVERS
-+It is sometimes useful to talk to servers
-+.Dq by hand
-+rather than through a user interface.
-+It can aid in troubleshooting,
-+when it might be necessary to verify what data a server is sending
-+in response to commands issued by the client.
-+For example, to retrieve the home page of a web site:
-+.Bd -literal -offset indent
-+$ printf "GET / HTTP/1.0\er\en\er\en" | nc host.example.com 80
-+.Ed
-+.Pp
-+Note that this also displays the headers sent by the web server.
-+They can be filtered, using a tool such as
-+.Xr sed 1 ,
-+if necessary.
-+.Pp
-+More complicated examples can be built up when the user knows the format
-+of requests required by the server.
-+As another example, an email may be submitted to an SMTP server using:
-+.Bd -literal -offset indent
-+$ nc localhost 25 \*(Lt\*(Lt EOF
-+HELO host.example.com
-+MAIL FROM:\*(Ltuser@host.example.com\*(Gt
-+RCPT TO:\*(Ltuser2@host.example.com\*(Gt
-+DATA
-+Body of email.
-+\&.
-+QUIT
-+EOF
-+.Ed
-+.Sh PORT SCANNING
-+It may be useful to know which ports are open and running services on
-+a target machine.
-+The
-+.Fl z
-+flag can be used to tell
-+.Nm
-+to report open ports,
-+rather than initiate a connection.
-+For example:
-+.Bd -literal -offset indent
-+$ nc -z host.example.com 20-30
-+Connection to host.example.com 22 port [tcp/ssh] succeeded!
-+Connection to host.example.com 25 port [tcp/smtp] succeeded!
-+.Ed
-+.Pp
-+The port range was specified to limit the search to ports 20 \- 30.
-+.Pp
-+Alternatively, it might be useful to know which server software
-+is running, and which versions.
-+This information is often contained within the greeting banners.
-+In order to retrieve these, it is necessary to first make a connection,
-+and then break the connection when the banner has been retrieved.
-+This can be accomplished by specifying a small timeout with the
-+.Fl w
-+flag, or perhaps by issuing a
-+.Qq Dv QUIT
-+command to the server:
-+.Bd -literal -offset indent
-+$ echo "QUIT" | nc host.example.com 20-30
-+SSH-1.99-OpenSSH_3.6.1p2
-+Protocol mismatch.
-+220 host.example.com IMS SMTP Receiver Version 0.84 Ready
-+.Ed
-+.Sh EXAMPLES
-+Open a TCP connection to port 42 of host.example.com, using port 31337 as
-+the source port, with a timeout of 5 seconds:
-+.Pp
-+.Dl $ nc -p 31337 -w 5 host.example.com 42
-+.Pp
-+Open a TCP connection to port 443 of www.google.ca, and negotiate TLS.
-+Check for a different name in the certificate for validation.
-+.Pp
-+.Dl $  nc -v -c -e adsf.au.doubleclick.net www.google.ca 443
-+.Pp
-+Open a UDP connection to port 53 of host.example.com:
-+.Pp
-+.Dl $ nc -u host.example.com 53
-+.Pp
-+Open a TCP connection to port 42 of host.example.com using 10.1.2.3 as the
-+IP for the local end of the connection:
-+.Pp
-+.Dl $ nc -s 10.1.2.3 host.example.com 42
-+.Pp
-+Create and listen on a
-+.Ux Ns -domain
-+stream socket:
-+.Pp
-+.Dl $ nc -lU /var/tmp/dsocket
-+.Pp
-+Connect to port 42 of host.example.com via an HTTP proxy at 10.2.3.4,
-+port 8080.
-+This example could also be used by
-+.Xr ssh 1 ;
-+see the
-+.Cm ProxyCommand
-+directive in
-+.Xr ssh_config 5
-+for more information.
-+.Pp
-+.Dl $ nc -x10.2.3.4:8080 -Xconnect host.example.com 42
-+.Pp
-+The same example again, this time enabling proxy authentication with username
-+.Dq ruser
-+if the proxy requires it:
-+.Pp
-+.Dl $ nc -x10.2.3.4:8080 -Xconnect -Pruser host.example.com 42
-+.Sh SEE ALSO
-+.Xr cat 1 ,
-+.Xr ssh 1
-+.Sh AUTHORS
-+Original implementation by *Hobbit*
-+.Aq Mt hobbit@avian.org .
-+.br
-+Rewritten with IPv6 support by
-+.An Eric Jackson Aq Mt ericj@monkey.org .
-+.Sh CAVEATS
-+UDP port scans using the
-+.Fl uz
-+combination of flags will always report success irrespective of
-+the target machine's state.
-+However,
-+in conjunction with a traffic sniffer either on the target machine
-+or an intermediary device,
-+the
-+.Fl uz
-+combination could be useful for communications diagnostics.
-+Note that the amount of UDP traffic generated may be limited either
-+due to hardware resources and/or configuration settings.
-
-Property changes on: secure/usr.bin/nc/netcat.1
-___________________________________________________________________
-Added: svn:eol-style
-## -0,0 +1 ##
-+native
-\ No newline at end of property
-Added: svn:keywords
-## -0,0 +1 ##
-+FreeBSD=%H
-\ No newline at end of property
-Added: svn:mime-type
-## -0,0 +1 ##
-+text/plain
-\ No newline at end of property
-Index: secure/usr.bin/openssl/Makefile
-===================================================================
---- secure/usr.bin/openssl/Makefile	(revision 304075)
-+++ secure/usr.bin/openssl/Makefile	(working copy)
-@@ -1,5 +1,8 @@
- # $FreeBSD$
- 
-+.include <src.opts.mk>
-+
-+.if ${MK_LIBRESSL} != "no"
- PROG=	openssl
- 
- LIBADD=	ssl crypto
-@@ -23,3 +26,7 @@
- 
- .PATH:	${LCRYPTO_SRC}/apps \
- 	${.CURDIR}/man
-+
-+.else
-+.include "Makefile.libressl"
-+.endif # ${MK_LIBRESSL} != "no"
-Index: secure/usr.bin/openssl/Makefile.libressl
-===================================================================
---- secure/usr.bin/openssl/Makefile.libressl	(nonexistent)
-+++ secure/usr.bin/openssl/Makefile.libressl	(working copy)
-@@ -0,0 +1,26 @@
-+#	$OpenBSD: Makefile,v 1.6 2015/09/11 14:30:23 bcook Exp $
-+
-+PROG=	openssl
-+
-+LIBADD=  ssl crypto
-+
-+MAN1=	openssl.1
-+
-+.include "../../lib/libcrypto/Makefile.inc.libressl"
-+
-+CFLAGS+=        -DMONOLITH
-+
-+.warning Building for LibreSSL ${OPENSSL_VER}
-+
-+SRCS=	apps.c apps_posix.c asn1pars.c ca.c certhash.c ciphers.c cms.c crl.c \
-+	crl2p7.c dgst.c dh.c dhparam.c dsa.c dsaparam.c ec.c ecparam.c enc.c \
-+	errstr.c gendh.c gendsa.c genpkey.c genrsa.c nseq.c ocsp.c \
-+	openssl.c passwd.c pkcs12.c pkcs7.c pkcs8.c pkey.c pkeyparam.c \
-+	pkeyutl.c prime.c rand.c req.c rsa.c rsautl.c s_cb.c s_client.c \
-+	s_server.c s_socket.c s_time.c sess_id.c smime.c speed.c spkac.c ts.c \
-+	verify.c version.c x509.c
-+
-+.include <bsd.prog.mk>
-+
-+.PATH:  ${LIBRESSL_SRC}/apps/openssl \
-+        ${.CURDIR}/man
-
-Property changes on: secure/usr.bin/openssl/Makefile.libressl
-___________________________________________________________________
-Added: svn:eol-style
-## -0,0 +1 ##
-+native
-\ No newline at end of property
-Added: svn:keywords
-## -0,0 +1 ##
-+FreeBSD=%H
-\ No newline at end of property
-Added: svn:mime-type
-## -0,0 +1 ##
-+text/plain
-\ No newline at end of property
-Index: share/mk/bsd.libnames.mk
-===================================================================
---- share/mk/bsd.libnames.mk	(revision 304075)
-+++ share/mk/bsd.libnames.mk	(working copy)
-@@ -146,6 +146,7 @@
- LIBTERMCAPW?=	${DESTDIR}${LIBDIR}/libtermcapw.a
- LIBTERMLIB?=	"don't use LIBTERMLIB, use LIBTERMCAP"
- LIBTINFO?=	"don't use LIBTINFO, use LIBNCURSES"
-+LIBTLS?=	${DESTDIR}${LIBDIR}/libtls.a
- LIBUFS?=	${DESTDIR}${LIBDIR}/libufs.a
- LIBUGIDFW?=	${DESTDIR}${LIBDIR}/libugidfw.a
- LIBULOG?=	${DESTDIR}${LIBDIR}/libulog.a
-Index: share/mk/src.libnames.mk
-===================================================================
---- share/mk/src.libnames.mk	(revision 304075)
-+++ share/mk/src.libnames.mk	(working copy)
-@@ -159,6 +159,7 @@
- 		tacplus \
- 		termcap \
- 		termcapw \
-+		tls \
- 		ufs \
- 		ugidfw \
- 		ulog \
-@@ -216,6 +217,7 @@
- .endif
- _DP_sqlite3=	pthread
- _DP_ssl=	crypto
-+_DP_tls=	crypto ssl
- _DP_ssh=	crypto crypt z
- .if ${MK_LDNS} != "no"
- _DP_ssh+=	ldns
-@@ -535,6 +537,7 @@
- LIBCRYPTODIR=	${OBJTOP}/secure/lib/libcrypto
- LIBSSHDIR=	${OBJTOP}/secure/lib/libssh
- LIBSSLDIR=	${OBJTOP}/secure/lib/libssl
-+LIBTLSDIR=	${OBJTOP}/secure/lib/libtls
- LIBTEKENDIR=	${OBJTOP}/sys/teken/libteken
- LIBEGACYDIR=	${OBJTOP}/tools/build
- LIBLNDIR=	${OBJTOP}/usr.bin/lex/lib
-Index: share/mk/src.opts.mk
-===================================================================
---- share/mk/src.opts.mk	(revision 304075)
-+++ share/mk/src.opts.mk	(working copy)
-@@ -119,6 +119,7 @@
-     LEGACY_CONSOLE \
-     LIB32 \
-     LIBPTHREAD \
-+    LIBRESSL \
-     LIBTHR \
-     LOCALES \
-     LOCATE \
-Index: usr.bin/Makefile
-===================================================================
---- usr.bin/Makefile	(revision 304075)
-+++ usr.bin/Makefile	(working copy)
-@@ -240,7 +240,9 @@
- SUBDIR.${MK_MAN_UTILS}+=	makewhatis
- .endif
- SUBDIR.${MK_MAN_UTILS}+=	man
-+.if ${MK_LIBRESSL} == "no"
- SUBDIR.${MK_NETCAT}+=	nc
-+.endif
- SUBDIR.${MK_NIS}+=	ypcat
- SUBDIR.${MK_NIS}+=	ypmatch
- SUBDIR.${MK_NIS}+=	ypwhich
-Index: usr.sbin/ppp/chap_ms.c
-===================================================================
---- usr.sbin/ppp/chap_ms.c	(revision 304075)
-+++ usr.sbin/ppp/chap_ms.c	(working copy)
-@@ -103,18 +103,18 @@
-     des_key[6] = Get7Bits(key, 42);
-     des_key[7] = Get7Bits(key, 49);
- 
--    des_set_odd_parity((des_cblock *)des_key);
-+    DES_set_odd_parity((DES_cblock *)des_key);
- }
- 
- static void /* IN 8 octets IN 7 octest OUT 8 octets */
- DesEncrypt(u_char *clear, u_char *key, u_char *cipher)
- {
--    des_cblock		des_key;
--    des_key_schedule	key_schedule;
-+    DES_cblock		des_key;
-+    DES_key_schedule	key_schedule;
- 
-     MakeKey(key, des_key);
--    des_set_key(&des_key, key_schedule);
--    des_ecb_encrypt((des_cblock *)clear, (des_cblock *)cipher, key_schedule, 1);
-+    DES_set_key(&des_key, &key_schedule);
-+    DES_ecb_encrypt((DES_cblock *)clear, (DES_cblock *)cipher, &key_schedule, 1);
- }
- 
- static void      /* IN 8 octets      IN 16 octets     OUT 24 octets */
