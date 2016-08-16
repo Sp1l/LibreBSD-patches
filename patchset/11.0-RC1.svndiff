@@ -3291,6 +3291,50 @@ Index: tools/build/mk/OptionalObsoleteFiles.inc
  #.if ${MK_LIBTHR} == no
  # to be filled in
  #.endif
+Index: tools/build/options/WITHOUT_LIBRESSL
+===================================================================
+--- tools/build/options/WITHOUT_LIBRESSL	(nonexistent)
++++ tools/build/options/WITHOUT_LIBRESSL	(working copy)
+@@ -0,0 +1,2 @@
++.\" $FreeBSD$
++Set to build OpenSSL as libcrypto/libssl provider as replacement of the LibreSSL equivalents. 
+
+Property changes on: tools/build/options/WITHOUT_LIBRESSL
+___________________________________________________________________
+Added: svn:eol-style
+## -0,0 +1 ##
++native
+\ No newline at end of property
+Added: svn:keywords
+## -0,0 +1 ##
++FreeBSD=%H
+\ No newline at end of property
+Added: svn:mime-type
+## -0,0 +1 ##
++text/plain
+\ No newline at end of property
+Index: tools/build/options/WITH_LIBRESSL
+===================================================================
+--- tools/build/options/WITH_LIBRESSL	(nonexistent)
++++ tools/build/options/WITH_LIBRESSL	(working copy)
+@@ -0,0 +1,2 @@
++.\" $FreeBSD$
++Set to build LibreSSL as libcrypto/libssl provider as replacement of the OpenSSL equivalents. 
+
+Property changes on: tools/build/options/WITH_LIBRESSL
+___________________________________________________________________
+Added: svn:eol-style
+## -0,0 +1 ##
++native
+\ No newline at end of property
+Added: svn:keywords
+## -0,0 +1 ##
++FreeBSD=%H
+\ No newline at end of property
+Added: svn:mime-type
+## -0,0 +1 ##
++text/plain
+\ No newline at end of property
 Index: usr.bin/Makefile
 ===================================================================
 --- usr.bin/Makefile	(revision 304075)
