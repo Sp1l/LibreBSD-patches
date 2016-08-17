@@ -381,22 +381,19 @@ Index: secure/lib/libcrypto/Makefile
 ===================================================================
 --- secure/lib/libcrypto/Makefile	(revision 304075)
 +++ secure/lib/libcrypto/Makefile	(working copy)
-@@ -1,9 +1,13 @@
+@@ -1,6 +1,11 @@
  # $FreeBSD$
  
+ SHLIBDIR?=	/lib
++
 +.include <src.opts.mk>
 +
-+.if ${MK_LIBRESSL} != "no"
++.if ${MK_LIBRESSL} == "no"
 +
- SHLIBDIR?=	/lib
  SUBDIR=		engines
  
--.include <bsd.own.mk>
-+#.include <bsd.own.mk>
- 
- LIB=		crypto
- SHLIB_MAJOR=	8
-@@ -472,3 +476,7 @@
+ .include <bsd.own.mk>
+@@ -472,3 +477,7 @@
  	${LCRYPTO_SRC}/crypto/x509 \
  	${LCRYPTO_SRC}/crypto/x509v3 \
  	${.CURDIR}/man

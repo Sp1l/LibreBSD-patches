@@ -1,13 +1,14 @@
 # $FreeBSD: releng/11.0/secure/lib/libcrypto/Makefile 299462 2016-05-11 16:45:58Z jkim $
 
+SHLIBDIR?=	/lib
+
 .include <src.opts.mk>
 
-.if ${MK_LIBRESSL} != "no"
+.if ${MK_LIBRESSL} == "no"
 
-SHLIBDIR?=	/lib
 SUBDIR=		engines
 
-#.include <bsd.own.mk>
+.include <bsd.own.mk>
 
 LIB=		crypto
 SHLIB_MAJOR=	8
