@@ -1,0 +1,156 @@
+diff --git a/contrib/telnet/libtelnet/enc_des.c b/contrib/telnet/libtelnet/enc_des.c
+index 2f7fe6e..72ad44c 100644
+--- a/contrib/telnet/libtelnet/enc_des.c
++++ b/contrib/telnet/libtelnet/enc_des.c
+@@ -207,9 +207,9 @@ fb64_start(struct fb *fbp, int dir, int server __unused)
+ 		/*
+ 		 * Create a random feed and send it over.
+ 		 */
+-		des_random_key((Block *)fbp->temp_feed);
+-		des_ecb_encrypt((Block *)fbp->temp_feed, (Block *)fbp->temp_feed,
+-				fbp->krbdes_sched, 1);
++		DES_random_key((Block *)fbp->temp_feed);
++		DES_ecb_encrypt((Block *)fbp->temp_feed, (Block *)fbp->temp_feed,
++				&fbp->krbdes_sched, 1);
+ 		p = fbp->fb_feed + 3;
+ 		*p++ = ENCRYPT_IS;
+ 		p++;
+@@ -393,7 +393,7 @@ fb64_session(Session_Key *key, int server, struct fb *fbp)
+ 	fb64_stream_key(fbp->krbdes_key, &fbp->streams[DIR_ENCRYPT-1]);
+ 	fb64_stream_key(fbp->krbdes_key, &fbp->streams[DIR_DECRYPT-1]);
+ 
+-	des_key_sched((Block *)fbp->krbdes_key, fbp->krbdes_sched);
++	DES_key_sched((Block *)fbp->krbdes_key, &fbp->krbdes_sched);
+ 	/*
+ 	 * Now look to see if krbdes_start() was was waiting for
+ 	 * the key to show up.  If so, go ahead an call it now
+@@ -499,7 +499,7 @@ fb64_stream_iv(Block seed, struct stinfo *stp)
+ 	memmove((void *)stp->str_iv, (void *)seed, sizeof(Block));
+ 	memmove((void *)stp->str_output, (void *)seed, sizeof(Block));
+ 
+-	des_key_sched((Block *)stp->str_ikey, stp->str_sched);
++	DES_key_sched((Block *)stp->str_ikey, &stp->str_sched);
+ 
+ 	stp->str_index = sizeof(Block);
+ }
+@@ -508,7 +508,7 @@ void
+ fb64_stream_key(Block key, struct stinfo *stp)
+ {
+ 	memmove((void *)stp->str_ikey, (void *)key, sizeof(Block));
+-	des_key_sched((Block *)key, stp->str_sched);
++	DES_key_sched((Block *)key, &stp->str_sched);
+ 
+ 	memmove((void *)stp->str_output, (void *)stp->str_iv, sizeof(Block));
+ 
+@@ -547,7 +547,7 @@ cfb64_encrypt(unsigned char *s, int c)
+ 	while (c-- > 0) {
+ 		if (idx == sizeof(Block)) {
+ 			Block b;
+-			des_ecb_encrypt((Block *)stp->str_output, (Block *)b, stp->str_sched, 1);
++			DES_ecb_encrypt((Block *)stp->str_output, (Block *)b, &stp->str_sched, 1);
+ 			memmove((void *)stp->str_feed, (void *)b, sizeof(Block));
+ 			idx = 0;
+ 		}
+@@ -580,7 +580,7 @@ cfb64_decrypt(int data)
+ 	idx = stp->str_index++;
+ 	if (idx == sizeof(Block)) {
+ 		Block b;
+-		des_ecb_encrypt((Block *)stp->str_output, (Block *)b, stp->str_sched, 1);
++		DES_ecb_encrypt((Block *)stp->str_output, (Block *)b, &stp->str_sched, 1);
+ 		memmove((void *)stp->str_feed, (void *)b, sizeof(Block));
+ 		stp->str_index = 1;	/* Next time will be 1 */
+ 		idx = 0;		/* But now use 0 */
+@@ -620,7 +620,7 @@ ofb64_encrypt(unsigned char *s, int c)
+ 	while (c-- > 0) {
+ 		if (idx == sizeof(Block)) {
+ 			Block b;
+-			des_ecb_encrypt((Block *)stp->str_feed, (Block *)b, stp->str_sched, 1);
++			DES_ecb_encrypt((Block *)stp->str_feed, (Block *)b, &stp->str_sched, 1);
+ 			memmove((void *)stp->str_feed, (void *)b, sizeof(Block));
+ 			idx = 0;
+ 		}
+@@ -650,7 +650,7 @@ ofb64_decrypt(int data)
+ 	idx = stp->str_index++;
+ 	if (idx == sizeof(Block)) {
+ 		Block b;
+-		des_ecb_encrypt((Block *)stp->str_feed, (Block *)b, stp->str_sched, 1);
++		DES_ecb_encrypt((Block *)stp->str_feed, (Block *)b, &stp->str_sched, 1);
+ 		memmove((void *)stp->str_feed, (void *)b, sizeof(Block));
+ 		stp->str_index = 1;	/* Next time will be 1 */
+ 		idx = 0;		/* But now use 0 */
+diff --git a/contrib/telnet/libtelnet/encrypt.h b/contrib/telnet/libtelnet/encrypt.h
+index eda8d57..5574a3c 100644
+--- a/contrib/telnet/libtelnet/encrypt.h
++++ b/contrib/telnet/libtelnet/encrypt.h
+@@ -67,7 +67,7 @@ typedef unsigned char *BlockT;
+ #if 0
+ typedef struct { Block __; } Schedule[16];
+ #else
+-#define Schedule des_key_schedule
++#define Schedule DES_key_schedule
+ #endif
+ 
+ #define	VALIDKEY(key)	( key[0] | key[1] | key[2] | key[3] | \
+diff --git a/contrib/telnet/libtelnet/pk.c b/contrib/telnet/libtelnet/pk.c
+index 05b74f4..033afec 100644
+--- a/contrib/telnet/libtelnet/pk.c
++++ b/contrib/telnet/libtelnet/pk.c
+@@ -129,7 +129,7 @@ common_key(char *xsecret, char *xpublic, IdeaData *ideakey, DesData *deskey)
+         mp_pow(public, secret, modulus, common);
+         extractdeskey(common, deskey);
+         extractideakey(common, ideakey);
+-	des_set_odd_parity(deskey);
++	DES_set_odd_parity(deskey);
+         mp_mfree(common);
+         mp_mfree(secret);
+         mp_mfree(public);
+@@ -221,14 +221,14 @@ pk_encode(char *in, char *out, DesData *key)
+ {
+ 	char buf[256];
+ 	DesData i;
+-	des_key_schedule k;
++	DES_key_schedule k;
+ 	int l,op,deslen;
+ 
+ 	memset(&i,0,sizeof(i));
+ 	memset(buf,0,sizeof(buf));
+ 	deslen = ((strlen(in) + 7)/8)*8;
+-	des_key_sched(key, k);
+-	des_cbc_encrypt(in,buf,deslen, k,&i,DES_ENCRYPT);
++	DES_key_sched(key, &k);
++	DES_cbc_encrypt(in,buf,deslen, &k,&i,DES_ENCRYPT);
+ 	for (l=0,op=0;l<deslen;l++) {
+ 		out[op++] = hextab[(buf[l] & 0xf0) >> 4];
+ 		out[op++] = hextab[(buf[l] & 0x0f)];
+@@ -242,7 +242,7 @@ pk_decode(char *in, char *out, DesData *key)
+ {
+ 	char buf[256];
+ 	DesData i;
+-	des_key_schedule k;
++	DES_key_schedule k;
+ 	int n1,n2,op;
+ 	size_t l;
+ 
+@@ -259,7 +259,7 @@ pk_decode(char *in, char *out, DesData *key)
+ 			n2 = in[op+1] - '0';
+ 		buf[l] = n1*16 +n2;
+ 	}
+-	des_key_sched(key, k);
+-	des_cbc_encrypt(buf,out,strlen(in)/2, k,&i,DES_DECRYPT);
++	DES_key_sched(key, &k);
++	DES_cbc_encrypt(buf,out,strlen(in)/2, &k,&i,DES_DECRYPT);
+ 	out[strlen(in)/2] = '\0';
+ }
+diff --git a/contrib/telnet/libtelnet/pk.h b/contrib/telnet/libtelnet/pk.h
+index 555d8eb..0c254a8 100644
+--- a/contrib/telnet/libtelnet/pk.h
++++ b/contrib/telnet/libtelnet/pk.h
+@@ -32,7 +32,7 @@
+ /* header for the des routines that we will use */
+ 
+ typedef unsigned char byte, DesData[ 8], IdeaData[16];
+-#define DesKeys des_key_schedule
++#define DesKeys DES_key_schedule
+ 
+ #define DES_DECRYPT 0
+ #define DES_ENCRYPT 1
