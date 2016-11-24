@@ -2,7 +2,7 @@
 
 .include <src.opts.mk>
 
-.if ${MK_LIBRESSL} != "no"
+.if ${MK_LIBRESSL} == "no"
 PROG=	openssl
 
 LIBADD=	ssl crypto
@@ -29,4 +29,4 @@ SRCS+=	app_rand.c apps.c asn1pars.c ca.c ciphers.c cms.c crl.c crl2p7.c \
 
 .else
 .include "Makefile.libressl"
-.endif # ${MK_LIBRESSL} != "no"
+.endif # ${MK_LIBRESSL} == "no"
